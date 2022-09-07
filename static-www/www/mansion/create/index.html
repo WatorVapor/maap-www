@@ -1,0 +1,28 @@
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark" id="vue-navbar-top">
+      <w-navbar></w-navbar>
+    </nav>
+    <div class="container-fluid mt-5 pt-4" id="vue-ui-create-star-mansion">
+      <div class="row justify-content-md-center">
+        <div class="col-8">
+          <h1 class="vue-lang">{% mansion.address %} <span class="badge bg-primary">{{mansion.address}}</span></h1>
+         </div>
+      </div>
+      <div class="row justify-content-md-center">
+        <div class="col-8">
+          <div class="input-group mb-3">
+            <span class="input-group-text vue-lang">{% mansion.name %}</span>
+            <input type="text" class="form-control" :value="mansion.name" v-model="mansion.name"/>
+          </div>
+         </div>
+      </div>
+      <div class="row justify-content-md-center">
+        <div class="col-8">
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success" @click="onStarMansionSaveBtn">
+              <span class="vue-lang">{% mansion.create_mansion %}</span>
+            </button>
+          </div>
+         </div>
+      </div>
+    </div>
+    <script src="./vue.ui.create.js" type="module"></script>
