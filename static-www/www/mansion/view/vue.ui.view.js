@@ -4,6 +4,34 @@ document.addEventListener('DOMContentLoaded', async (evt) => {
   await createStarMansionApp_();
 });
 
+window.addEventListener('TopMenuBarLoaded', async (evt) => {
+  console.log('TopMenuBarLoaded::evt=<',evt,'>');
+  const vm = window.vueVm.navbar;
+  if(vm) {
+    console.log('TopMenuBarLoaded::window.vueVm.navbar=<',window.vueVm.navbar,'>');
+    vm.apps = [
+      {
+        href:`${constAppPrefix}/mansion/add_gateway_blue_star`,
+        icon1:'add',
+        icon2:'bluetooth',
+        icon3:'device_hub',
+      },
+      {
+        href:`${constAppPrefix}/mansion/add_gateway_blue_star`,
+        icon1:'add',
+        icon2:'bluetooth',
+        icon3:'device_hub',
+      },
+      {
+        href:`${constAppPrefix}/mansion/add_storage_star`,
+        icon1:'add',
+        icon2:'save_alt',
+      },
+    ];
+  }
+});
+
+
 const star_mansion_option = {
   data() {
     return {

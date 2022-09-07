@@ -20,6 +20,9 @@ const createTopNavBar_ = async ()=> {
   if(NAVBAR.debug) {
     console.log('w-navbar::createTopNavBar_::EDAuth=<',EDAuth,'>');
   }
+  window.vueVm = window.vueVm || {};
+  window.vueVm.navbar = vm;
+
   const edAuth = new EDAuth();
   vm.accout.name = edAuth.name();
   const evt = document.createEvent('Event');
