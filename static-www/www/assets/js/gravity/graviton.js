@@ -32,6 +32,8 @@ export class Graviton {
     if(!isGood) {
       return this.jump2jwtRequest_();
     }
+    this.clientid_ = jwtReply.payload.clientid;
+    this.username_ = jwtReply.payload.username;
     this.createMqttConnection_(jwtReply);
   }
   jump2jwtRequest_() {
@@ -40,37 +42,6 @@ export class Graviton {
       console.log('Graviton::jump2jwtRequest_:jwtPaht=<',jwtPaht,'>');
     }
     window.location.assign(jwtPaht) ;
-  }
-  verifyJwt_(jwtReply) {
-    if(!jwtReply.jwt) {
-      return false;
-    }
-    // wait decode jwt...
-    // this time believe payload from server.
-    if(!jwtReply.payload) {
-      return false;
-    }
-    const now = new Date();
-    const iat = new Date();
-    iat.setTime(parseInt(jwtReply.payload.iat) * 1000);
-    const exp = new Date();
-    exp.setTime(parseInt(jwtReply.payload.exp) * 1000);
-    if(Graviton.trace) {
-      console.log('Graviton::verifyJwt_:now=<',now,'>');
-      console.log('Graviton::verifyJwt_:iat=<',iat,'>');
-      console.log('Graviton::verifyJwt_:iat=<',exp,'>');
-    }
-    const remain_ms = exp - now;
-    const remain_hour = parseFloat(remain_ms)/(1000.0*3600.0);
-    if(Graviton.trace) {
-      console.log('Graviton::verifyJwt_:remain_ms=<',remain_ms,'>');
-      console.log('Graviton::verifyJwt_:remain_hour=<',remain_hour,'>');
-    }
-    if(remain_ms > 0) {
-      return true;
-    } else {
-      return false;
-    }
   }
   createMqttConnection_(jwtReply) {
     const options = {
@@ -106,6 +77,38 @@ export class Graviton {
       console.log('Graviton::createMqttConnection_ subscribe granted:=<', granted, '>');      
     });
   }  
+  verifyJwt_(jwtReply) {
+    if(!jwtReply.jwt) {
+      return false;
+    }
+    // wait decode jwt...
+    // this time believe payload from server.
+    if(!jwtReply.payload) {
+      return false;
+    }
+    const now = new Date();
+    const iat = new Date();
+    iat.setTime(parseInt(jwtReply.payload.iat) * 1000);
+    const exp = new Date();
+    exp.setTime(parseInt(jwtReply.payload.exp) * 1000);
+    if(Graviton.trace) {
+      console.log('Graviton::verifyJwt_:now=<',now,'>');
+      console.log('Graviton::verifyJwt_:iat=<',iat,'>');
+      console.log('Graviton::verifyJwt_:iat=<',exp,'>');
+    }
+    const remain_ms = exp - now;
+    const remain_hour = parseFloat(remain_ms)/(1000.0*3600.0);
+    if(Graviton.trace) {
+      console.log('Graviton::verifyJwt_:remain_ms=<',remain_ms,'>');
+      console.log('Graviton::verifyJwt_:remain_hour=<',remain_hour,'>');
+    }
+    if(remain_ms > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   onMqttMessage_(channel, message) {
     //console.log('Graviton::onMqttMessage_ channel:=<', channel, '>');
     //console.log('Graviton::onMqttMessage_ message:=<', message, '>');
@@ -121,12 +124,48 @@ export class Graviton {
         console.log('Graviton::onMqttMessage_ goodAuthed:=<', goodAuthed, '>');
       }
       if(goodAuthed && typeof this.cb_ === 'function') {
+        if(channel.endsWith('/graviton/joined')) {
+          this.onNodeJoined_(msgJson);
+        }
         this.cb_(channel, msgJson);
       }
     } catch(err) {
       console.error('Graviton::onMqttMessage_ err:=<', err, '>');
       console.error('Graviton::onMqttMessage_ msgStr:=<', msgStr, '>');
     }
+  }
+  onNodeJoined_(nodeMsg) {
+    if(Graviton.debug) {
+      console.log('Graviton::onNodeJoined_ nodeMsg:=<', nodeMsg, '>');
+    }
+    if(nodeMsg.offer) {
+      const echoWorld = {
+        clientid:this.clientid_,
+        username:this.username_,
+        address:this.mass_.address_,
+        answer:true,
+      }
+      if(Graviton.debug) {
+        console.log('Graviton::onNodeJoined_::echoWorld=<',echoWorld,'>');
+      }
+      this.broadcast_('graviton/joined/echo',echoWorld);      
+    }
+  }
+  broadcast_(topic,msg) {
+    const signedMsg = this.mass_.sign(msg);
+    if(Graviton.debug) {
+      console.log('Graviton::broadcast_::signedMsg=<',signedMsg,'>');
+    }
+    const fullTopic = `${this.username_}/${topic}`;
+    if(Graviton.debug) {
+      console.log('Graviton::broadcast_::fullTopic=<',fullTopic,'>');
+    }
+    this.mqttClient_.publish(fullTopic,JSON.stringify(signedMsg),{qos:1},(err) => {
+      if(Graviton.debug) {
+        console.log('Graviton::broadcast_::err=<',err,'>');
+      }      
+    });
+    
   }
 }
 

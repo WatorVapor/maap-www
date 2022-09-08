@@ -11,21 +11,20 @@ window.addEventListener('TopMenuBarLoaded', async (evt) => {
     console.log('TopMenuBarLoaded::window.vueVm.navbar=<',window.vueVm.navbar,'>');
     vm.apps = [
       {
-        href:`${constAppPrefix}/mansion/add_gateway_blue_star`,
+        href:`${constAppPrefix}/mansion/add_gateway`,
         icon1:'add',
         icon2:'bluetooth',
         icon3:'device_hub',
       },
       {
-        href:`${constAppPrefix}/mansion/add_gateway_blue_star`,
-        icon1:'add',
-        icon2:'bluetooth',
-        icon3:'device_hub',
-      },
-      {
-        href:`${constAppPrefix}/mansion/add_storage_star`,
+        href:`${constAppPrefix}/mansion/add_storage`,
         icon1:'add',
         icon2:'save_alt',
+      },
+      {
+        href:`${constAppPrefix}/mansion/add_anchor_uwb`,
+        icon1:'add',
+        icon2:'gps_fixed',
       },
     ];
   }
