@@ -5,6 +5,7 @@ const constGravitonMassAddress = 'maap/Graviton/mass/address';
 const constEdAuthPrefix = 'maap/edauth/mass';
 const constEdAuthName = 'maap/edauth/name';
 
+const constDIDAuthPrefix = 'maap/didauth/mass';
 
 const constCreateMansionPrefix = 'maap/mansion/create/mass'
 const constMasnsionName = 'maap/mansion/create/name';

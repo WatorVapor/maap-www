@@ -1,55 +1,49 @@
-import * as Vue from 'https://cdn.jsdelivr.net/npm/vue@3.2.37/dist/vue.esm-browser.prod.js';
-let gVMKeyImport = false;
-let gVMToken = false;
-let gVMKeyExport = false;
-let edAuth = false;
+import * as Vue from 'https://cdn.jsdelivr.net/npm/vue@3.2.39/dist/vue.esm-browser.prod.js';
+import * as DIDAUTH from '/maap/assets/js/didauth.js';
+
 document.addEventListener('DOMContentLoaded', async (evt) => {
   console.log('DOMContentLoaded::evt=<',evt,'>');
   createAccountApp_();
 });
 
+const gApp = {};
 const createAccountApp_ = async ()=> {
-  const EDAUTH = await import(`${constAppPrefix}/assets/js/edauth.js`);
-  console.log('createAccountApp_::EDAUTH=<',EDAUTH,'>');
-  edAuth = new EDAUTH.EDAuth();
+  console.log('createAccountApp_::DIDAUTH=<',DIDAUTH,'>');
+  const didAuth = new DIDAUTH.DIDAuth();
   const appImport = Vue.createApp({
     data() {
       return {
-        edAuth:{
+        didAuth:{
           secret:'',
           secretQR:''
         }
       };
     }
   });
-  gVMKeyImport = appImport.mount('#vue-ui-edAuth-import');
-  //console.log('createAccountApp_::gVMKeyImport=<',gVMKeyImport,'>');
-  //console.log('createAccountApp_::gVMKeyImport.edAuth=<',gVMKeyImport.edAuth,'>');
+  gApp.importKey = appImport.mount('#vue-ui-didAuth-import');
   const appToken = Vue.createApp({
     data() {
       return {
-        edAuth:{
-          id:edAuth.address(),
-          name:edAuth.name()
+        didAuth:{
+          id:didAuth.address(),
+          name:didAuth.name()
         }
       };
     }
   });
-  gVMToken = appToken.mount('#vue-ui-edAuth-token');
-  //console.log('createAccountApp_::QRCode=<',QRCode,'>');
-  const qrcode = await new QRCode.toDataURL(edAuth.secret());
-  //console.log('createAccountApp_::qrcode=<',qrcode,'>');
+  gApp.token = appToken.mount('#vue-ui-didAuth-token');
+  const qrcode = await new QRCode.toDataURL(didAuth.secret());
   const appExport = Vue.createApp({
     data() {
       return {
-        edAuth:{
-          secret:edAuth.secret(),
+        didAuth:{
+          secret:didAuth.secret(),
           secretQR:qrcode
         }
       };
     }
   });
-  gVMKeyExport = appExport.mount('#vue-ui-edAuth-export');   
+  gApp.exportKey = appExport.mount('#vue-ui-didAuth-export');   
 }
 
 window.onUIClickApplyGravitionTokenName = (elem) => {

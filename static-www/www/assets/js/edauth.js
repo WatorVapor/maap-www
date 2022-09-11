@@ -1,4 +1,5 @@
-const MASS = await import(`./gravity/mass.js`);
+//const MASS = await import(`./gravity/mass.js`);
+import * as MASS from './gravity/mass.js';
 export class EDAuth {
   constructor() {
     if(EDAuth.debug) {
