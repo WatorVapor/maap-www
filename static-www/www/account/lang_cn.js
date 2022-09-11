@@ -3,7 +3,7 @@ export const data = {
     keyImport:'导入已存账户',
     importApply:'导入',
     verify:'验证密钥正确性',
-    tokenlabel:'账号令牌:',
+    tokenlabel:'DID标识符:',
     namelabel:'账户名字:',
     modify:'变更',
     keyExport:'导出现在账户',
