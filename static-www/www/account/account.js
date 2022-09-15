@@ -10,40 +10,45 @@ const gApp = {};
 const createAccountApp_ = async ()=> {
   console.log('createAccountApp_::DIDAUTH=<',DIDAUTH,'>');
   const didAuth = new DIDAUTH.DIDAuth();
-  const appImport = Vue.createApp({
+  const appJoin = Vue.createApp({
     data() {
       return {
         didAuth:{
-          secret:'',
-          secretQR:''
+          didText:'',
+          didQR:'',
+          didDocument:{},
         }
       };
     }
   });
-  gApp.importKey = appImport.mount('#vue-ui-didAuth-import');
+  gApp.join = appJoin.mount('#vue-ui-didAuth-join');
   const appToken = Vue.createApp({
     data() {
       return {
         didAuth:{
-          id:didAuth.address(),
+          didText:didAuth.address(),
           name:didAuth.name()
         }
       };
     }
   });
   gApp.token = appToken.mount('#vue-ui-didAuth-token');
-  const qrcode = await new QRCode.toDataURL(didAuth.secret());
-  const appExport = Vue.createApp({
+  
+  const qrcode = await new QRCode.toDataURL(didAuth.address());
+  const appDetails = Vue.createApp({
     data() {
       return {
         didAuth:{
-          secret:didAuth.secret(),
-          secretQR:qrcode
+          didText:didAuth.address(),
+          didQR:qrcode,
+          didDocumentJson:JSON.stringify(didAuth.document(),undefined,2),          
         }
       };
     }
   });
-  gApp.exportKey = appExport.mount('#vue-ui-didAuth-export');   
+  console.log('createAccountApp_::appDetails=<',appDetails,'>');
+  gApp.details = appDetails.mount('#vue-ui-didAuth-details');   
+  console.log('createAccountApp_::gApp=<',gApp,'>');
 }
 
 window.onUIClickApplyGravitionTokenName = (elem) => {

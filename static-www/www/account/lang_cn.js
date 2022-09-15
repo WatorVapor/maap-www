@@ -1,5 +1,15 @@
 export const data = {
   account:{
+    createDid:'创建新DID',
+    joinDid:'加入已存DID',
+    didQRScan:'扫描DID二维码',
+    didLoadQRFile:'加载DID二维码文件',
+    didText:'DID标识符',
+    join:'加入',
+    didDocumentMine:'我的DID文档',
+    didMine:'我的DID',
+    didDocumentDetails:'DID文档详细',
+    
     keyImport:'导入已存账户',
     importApply:'导入',
     verify:'验证密钥正确性',

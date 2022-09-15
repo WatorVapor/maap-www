@@ -23,6 +23,20 @@ export class DIDAuth {
   name() {
     return DIDAuth.name_;
   }
+  document() {
+    const didDoc = {
+      '@context':'https://www.wator.xyz/maap/',
+      id:this.address(),
+      publicKey:[
+        {
+          id:`${this.address()}#`,
+          type: 'ed25519',
+          publicKeyBase64: this.pub(),
+        }
+      ]
+    };
+    return didDoc;
+  }
   storeName(name) {
     DIDAuth.name_ = name;
     localStorage.setItem(constEdAuthName,name);
