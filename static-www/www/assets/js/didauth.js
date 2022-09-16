@@ -27,12 +27,28 @@ export class DIDAuth {
     const didDoc = {
       '@context':'https://www.wator.xyz/maap/',
       id:this.address(),
-      publicKey:[
+      authentication:[
         {
           id:`${this.address()}#`,
           type: 'ed25519',
+          controller: `${this.address()}`,
           publicKeyBase64: this.pub(),
         }
+      ],
+      service: [
+        {
+          id:`${this.address()}#`,
+          type: 'mqtturi',
+          serviceEndpoint: 'wss://wator.xyz:8084/jwt',
+          serviceMqtt:{
+            uri:'wss://wator.xyz:8084/mqtt',
+            acl:{
+              all:[
+                '${username}/#',
+              ]
+            }
+          }
+        },
       ]
     };
     return didDoc;
