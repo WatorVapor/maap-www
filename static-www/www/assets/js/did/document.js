@@ -62,3 +62,10 @@ export class DIDSeedDocument extends DIDDocument {
     super(constDIDAuthPrefix);
   }
 }
+
+export class DIDGuestDocument extends DIDDocument {
+  static debug = true;
+  constructor() {
+    super(constDIDAuthPrefix);
+  }
+}
