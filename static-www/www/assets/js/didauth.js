@@ -27,17 +27,23 @@ export class DIDAuth {
     const didDoc = {
       '@context':'https://www.wator.xyz/maap/',
       id:this.address(),
-      authentication:[
+      version:1.0,
+      created:(new Date()).toISOString(),
+      publicKey:[
         {
-          id:`${this.address()}#`,
+          id:`${this.address()}#${this.mass_.address_}`,
           type: 'ed25519',
           controller: `${this.address()}`,
           publicKeyBase64: this.pub(),
         }
       ],
+      authentication:[
+        `${this.address()}#${this.mass_.address_}`,
+      ],
+      recovery:[],
       service: [
         {
-          id:`${this.address()}#`,
+          id:`${this.address()}#${this.mass_.address_}`,
           type: 'mqtturi',
           serviceEndpoint: 'wss://wator.xyz:8084/jwt',
           serviceMqtt:{
@@ -49,8 +55,16 @@ export class DIDAuth {
             }
           }
         },
-      ]
+      ],
     };
+    const signedMsg = this.mass_.signWithoutTS(didDoc);
+    const proof = {
+      type:'ed25519',
+      creator:`${this.address()}#${this.mass_.address_}`,
+      signatureValue:signedMsg.auth.sign,
+    };
+    didDoc.proof = [];
+    didDoc.proof.push(proof);
     return didDoc;
   }
   storeName(name) {

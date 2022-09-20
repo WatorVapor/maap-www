@@ -41,6 +41,34 @@ export class Mass {
     signMsgObj.auth.sign = signedB64;
     return signMsgObj;
   }
+  signWithoutTS(msgOrig) {
+    const msgOrigStr = JSON.stringify(msgOrig);
+    const encoder = new TextEncoder();
+    const hash = nacl.hash(encoder.encode(msgOrigStr));
+    if(Mass.debug) {
+      console.log('Mass::sign::hash=<',hash,'>');
+    }
+    const hash512B64 = nacl.util.encodeBase64(hash);
+    if(Mass.debug) {
+      console.log('Mass::sign::hash512B64=<',hash512B64,'>');
+    }
+    const sha1MsgB64 = CryptoJS.SHA1(hash512B64).toString(CryptoJS.enc.Base64);
+    if(Mass.debug) {
+      console.log('Mass::sign::sha1MsgB64=<',sha1MsgB64,'>');
+    }
+    const sha1MsgBin = nacl.util.decodeBase64(sha1MsgB64);;
+    const signed = nacl.sign(sha1MsgBin,this.secretKey_);
+    if(Mass.debug) {
+      console.log('Mass::sign::signed=<',signed,'>');
+    }
+    const signedB64 = nacl.util.encodeBase64(signed);
+    const signMsgObj = JSON.parse(msgOrigStr);
+    signMsgObj.auth = {};
+    signMsgObj.auth.pub = this.publicKeyB64_;
+    signMsgObj.auth.sign = signedB64;
+    return signMsgObj;
+  }
+
   verify(msg) {
     //console.log('Mass::verify::msg=<',msg,'>');
     const created_at = new Date(msg.ts);
