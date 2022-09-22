@@ -1,4 +1,5 @@
 import {MassStore} from '../gravity/mass-store.js';
+import {DIDSeedDocument,DIDLinkedDocument,DIDGuestDocument} from './document.js';
 
 export class Evidence {
   static trace = false;
@@ -16,6 +17,7 @@ export class Evidence {
     }
   }
   address(){
+    /*
     if(this.didDocument) {
       return this.didDocument.id;
     }
@@ -26,9 +28,14 @@ export class Evidence {
       }
       return did;
     }
+    */
+    if(this.didDoc_) {
+      return this.didDoc_.address();
+    }
     return `did:${Evidence.did_method}:`;
   }
   document() {
+    /*
     if(this.didDocument) {
       return this.didDocument;
     }
@@ -92,7 +99,11 @@ export class Evidence {
     
     
     this.didDocument = didDoc;
-    return didDoc;
+    */
+    if(this.didDoc_) {
+      return this.didDoc_.document();
+    }
+    return {};
   }
   
   
@@ -100,12 +111,18 @@ export class Evidence {
     if(Evidence.debug) {
       console.log('Evidence::createFromJson_:docJson=<',docJson,'>');
     }
+    /*
     this.didDocument = docJson;
     //this.massAuth_ = new MassStore(docJson,cb);
+    */
+    this.didDoc_ = new DIDLinkedDocument(docJson,cb);
   }
   createSeed_(cb) {
+    /*
     this.massAuth_ = new MassStore(null,cb);
     this.massRecovery_ = new MassStore(null,cb);
+    */
+    this.didDoc_ = new DIDSeedDocument(cb);
   }
 }
 
@@ -143,6 +160,18 @@ export class ChainOfEvidence {
       localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(doc));
     });
   }
+  join(id) {
+    const guestEviJson = {id:id};
+    this.topEvidence_ = new Evidence(guestEviJson,()=> {
+      const doc = this.topEvidence_.document();
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::createSeed:doc=<',doc,'>');
+      }
+      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(doc));
+    });
+  }
+  
+  
   loadEvidence_() {
     const topEviStr = localStorage.getItem(constDIDAuthEvidenceTop);
     if(ChainOfEvidence.debug) {
