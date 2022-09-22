@@ -3,15 +3,19 @@
     </nav>
     <div class="container-fluid mt-5 pt-4">
       <div class="row justify-content-center">
+        <div class="col-3 d-flex justify-content-center">         
+          <button class="btn btn-success vue-lang" type="button" onclick="onUIClickCreateDid(this)">
+            {% account.createDid %}
+          </button>
+          <div class="spinner-border text-success d-none" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        
         <div class="col-2 d-flex justify-content-center">         
-            <button class="btn btn-success vue-lang" type="button">
-              {% account.createDid %}
-            </button>
-         </div>
-        <div class="col-2 d-flex justify-content-center">         
-            <button class="btn btn-warning vue-lang" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJoinDid" aria-expanded="false" aria-controls="collapseJoinDid">
-              {% account.joinDid %}
-            </button>
+          <button class="btn btn-warning vue-lang" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJoinDid" aria-expanded="false" aria-controls="collapseJoinDid">
+            {% account.joinDid %}
+          </button>
          </div>
       </div>
     </div>

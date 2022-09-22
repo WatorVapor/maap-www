@@ -59,13 +59,13 @@ export class DIDDocument {
 export class DIDSeedDocument extends DIDDocument {
   static debug = true;
   constructor() {
-    super(constDIDAuthPrefix);
+    super(constDIDAuthMassPrefix);
   }
 }
 
 export class DIDGuestDocument extends DIDDocument {
   static debug = true;
   constructor() {
-    super(constDIDAuthPrefix);
+    super(constDIDAuthMassPrefix);
   }
 }

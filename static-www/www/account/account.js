@@ -1,15 +1,16 @@
 import * as Vue from 'https://cdn.jsdelivr.net/npm/vue@3.2.39/dist/vue.esm-browser.prod.js';
-import * as DIDAUTH from '/maap/assets/js/didauth.js';
-
+import { DIDAuth } from '/maap/assets/js/did-auth.js';
+//console.log('::DIDAuth=<',DIDAuth,'>');
 document.addEventListener('DOMContentLoaded', async (evt) => {
   console.log('DOMContentLoaded::evt=<',evt,'>');
   createAccountApp_();
 });
 
 const gApp = {};
+let gDidAuth = false;
+
 const createAccountApp_ = async ()=> {
-  console.log('createAccountApp_::DIDAUTH=<',DIDAUTH,'>');
-  const didAuth = new DIDAUTH.DIDAuth();
+  gDidAuth = new DIDAuth();
   const appJoin = Vue.createApp({
     data() {
       return {
@@ -26,22 +27,22 @@ const createAccountApp_ = async ()=> {
     data() {
       return {
         didAuth:{
-          didText:didAuth.address(),
-          name:didAuth.name()
+          didText:gDidAuth.address(),
+          name:gDidAuth.name()
         }
       };
     }
   });
   gApp.token = appToken.mount('#vue-ui-didAuth-token');
   
-  const qrcode = await new QRCode.toDataURL(didAuth.address());
+  const qrcode = await new QRCode.toDataURL(gDidAuth.address());
   const appDetails = Vue.createApp({
     data() {
       return {
         didAuth:{
-          didText:didAuth.address(),
+          didText:gDidAuth.address(),
           didQR:qrcode,
-          didDocumentJson:JSON.stringify(didAuth.document(),undefined,2),          
+          didDocumentJson:JSON.stringify(gDidAuth.document(),undefined,2),          
         }
       };
     }
@@ -49,6 +50,20 @@ const createAccountApp_ = async ()=> {
   console.log('createAccountApp_::appDetails=<',appDetails,'>');
   gApp.details = appDetails.mount('#vue-ui-didAuth-details');   
   console.log('createAccountApp_::gApp=<',gApp,'>');
+}
+
+
+window.onUIClickCreateDid = (elem) => {
+  console.log('onUIClickCreateDid::elem=<',elem,'>');
+  try {
+    const spinElem = elem.parentElement.getElementsByTagName('div')[0];
+    console.log('onUIClickCreateDid::spinElem=<',spinElem,'>');
+    spinElem.setAttribute('class','spinner-border text-success ');
+    gDidAuth.createDid();
+    spinElem.setAttribute('class','spinner-border text-success d-none');
+  } catch(err) {
+    console.error('onUIClickCreateDid::err=<',err,'>');
+  }
 }
 
 window.onUIClickApplyGravitionTokenName = (elem) => {

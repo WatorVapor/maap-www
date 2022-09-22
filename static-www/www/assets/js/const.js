@@ -5,8 +5,6 @@ const constGravitonMassAddress = 'maap/Graviton/mass/address';
 const constEdAuthPrefix = 'maap/edauth/mass';
 const constEdAuthName = 'maap/edauth/name';
 
-const constDIDAuthPrefix = 'maap/didauth/mass';
-
 const constCreateMansionPrefix = 'maap/mansion/create/mass'
 const constMasnsionName = 'maap/mansion/create/name';
 
@@ -24,3 +22,12 @@ const constAnchorGpsManualFix = 'maap/anchor/gps/manual/fix';
 
 const constAppPrefix = '/maap';
 const constKeyLanguangeCode = 'maap/lang_code';
+
+
+const constDIDAuthName = 'maap/didauth/name';
+const constDIDAuthMassPrefix = 'maap/didauth/mass';
+const constDIDAuthCurrentDid = 'maap/didauth/current/did';
+const constDIDAuthCurrentDoc = 'maap/didauth/current/document';
+const constDIDAuthEvidenceTop = 'maap/didauth/evidence/top';
+
+const constDIDAuthMassStore = 'maap/didauth/mass/store';
