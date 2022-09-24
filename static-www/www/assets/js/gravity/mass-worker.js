@@ -1,3 +1,4 @@
+/*
 import * as NACL from 'https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js';
 console.log('::::NACL=<',NACL,'>');
 
@@ -51,4 +52,5 @@ const calcAddress_ = (b64Pub) => {
   }
   return address;
 }
+*/
 

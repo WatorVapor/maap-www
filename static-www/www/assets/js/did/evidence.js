@@ -10,96 +10,26 @@ export class Evidence {
     if(Evidence.trace) {
       console.log('Evidence::constructor:MassStore=<',MassStore,'>');
     }
+    if(Evidence.debug) {
+      console.log('Evidence::constructor:docJson=<',docJson,'>');
+    }
     if(docJson) {
-      this.createFromJson_(docJson,cb);
+      if(docJson._maap_guest) {
+        this.joinDid(docJson,cb);
+      } else {
+        this.createFromJson_(docJson,cb);
+      }
     } else {
       this.createSeed_(cb);
     }
   }
   address(){
-    /*
-    if(this.didDocument) {
-      return this.didDocument.id;
-    }
-    if(this.massAuth_) {
-      const did = `did:${Evidence.did_method}:${this.massAuth_.address()}`;
-      if(Evidence.trace) {
-        console.log('Evidence::address:did=<',did,'>');
-      }
-      return did;
-    }
-    */
     if(this.didDoc_) {
       return this.didDoc_.address();
     }
     return `did:${Evidence.did_method}:`;
   }
   document() {
-    /*
-    if(this.didDocument) {
-      return this.didDocument;
-    }
-    const didDoc = {
-      '@context':'https://www.wator.xyz/maap/',
-      id:this.address(),
-      version:1.0,
-      created:(new Date()).toISOString(),
-      publicKey:[
-        {
-          id:`${this.massAuth_.address()}#${this.massAuth_.address()}`,
-          type: 'ed25519',
-          controller: `${this.massAuth_.address()}`,
-          publicKeyBase64: this.massAuth_.pub(),
-        },
-        {
-          id:`${this.massRecovery_.address()}#${this.massRecovery_.address()}`,
-          type: 'ed25519',
-          controller: `${this.massRecovery_.address()}`,
-          publicKeyBase64: this.massRecovery_.pub(),
-        },
-      ],
-      authentication:[
-        `${this.massAuth_.address()}#${this.massAuth_.address()}`,
-      ],
-      recovery:[
-       `${this.massRecovery_.address()}#${this.massRecovery_.address()}`,
-     ],
-      service: [
-        {
-          id:`${this.massAuth_.address()}#${this.massAuth_.address()}`,
-          type: 'mqtturi',
-          serviceEndpoint: 'wss://wator.xyz:8084/jwt',
-          serviceMqtt:{
-            uri:'wss://wator.xyz:8084/mqtt',
-            acl:{
-              all:[
-                '${username}/#',
-              ]
-            }
-          }
-        },
-      ],
-    };
-    didDoc.proof = [];
-    const signedMsg = this.massAuth_.signWithoutTS(didDoc);
-    const proof = {
-      type:'ed25519',
-      creator:`${this.address()}#${this.massAuth_.address_}`,
-      signatureValue:signedMsg.auth.sign,
-    };
-    didDoc.proof.push(proof);
-    
-    const signedMsg2 = this.massRecovery_.signWithoutTS(didDoc);
-    const proof2 = {
-      type:'ed25519',
-      creator:`${this.address()}#${this.massRecovery_.address_}`,
-      signatureValue:signedMsg2.auth.sign,
-    };
-    didDoc.proof.push(proof2);
-    
-    
-    this.didDocument = didDoc;
-    */
     if(this.didDoc_) {
       return this.didDoc_.document();
     }
@@ -111,19 +41,18 @@ export class Evidence {
     if(Evidence.debug) {
       console.log('Evidence::createFromJson_:docJson=<',docJson,'>');
     }
-    /*
-    this.didDocument = docJson;
-    //this.massAuth_ = new MassStore(docJson,cb);
-    */
     this.didDoc_ = new DIDLinkedDocument(docJson,cb);
   }
   createSeed_(cb) {
-    /*
-    this.massAuth_ = new MassStore(null,cb);
-    this.massRecovery_ = new MassStore(null,cb);
-    */
     this.didDoc_ = new DIDSeedDocument(cb);
   }
+  joinDid(docJson,cb) {
+    if(Evidence.debug) {
+      console.log('Evidence::joinDid:docJson=<',docJson,'>');
+    }
+    this.didDoc_ = new DIDGuestDocument(docJson.id,cb);
+  }
+
 }
 
 export class ChainOfEvidence {
@@ -160,12 +89,12 @@ export class ChainOfEvidence {
       localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(doc));
     });
   }
-  join(id) {
-    const guestEviJson = {id:id};
+  joinDid(id) {
+    const guestEviJson = {id:id,_maap_guest:true};
     this.topEvidence_ = new Evidence(guestEviJson,()=> {
       const doc = this.topEvidence_.document();
       if(ChainOfEvidence.debug) {
-        console.log('ChainOfEvidence::createSeed:doc=<',doc,'>');
+        console.log('ChainOfEvidence::joinDid:doc=<',doc,'>');
       }
       localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(doc));
     });

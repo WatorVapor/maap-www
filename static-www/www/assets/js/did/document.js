@@ -2,29 +2,23 @@ import {MassStore} from '../gravity/mass-store.js';
 export class DIDDocument {
   static debug = true;
   static did_method = 'maap';
-  constructor(id) {
-    if(DIDDocument.debug) {
-      console.log('DIDDocument::constructor:id=<',id,'>');
-    }
-    this.address_ = id;
-  }
-  address() {
-    return this.address_;
+  constructor() {
   }
 }
 
-export class DIDSeedDocument extends DIDDocument {
+export class DIDSeedDocument {
   static debug = true;
   constructor(cb) {
     this.massAuth_ = new MassStore(null,cb);
     this.massRecovery_ = new MassStore(null,cb);
-    const address = `did:${DIDDocument.did_method}:${this.massAuth_.address()}`;
-    super(address);
+  }
+  address() {
+    return `did:${DIDDocument.did_method}:${this.massAuth_.address()}`;
   }
   document() {
     const didDoc = {
       '@context':'https://www.wator.xyz/maap/',
-      id:super.address(),
+      id:`did:${DIDDocument.did_method}:${this.massAuth_.address()}`,
       version:1.0,
       created:(new Date()).toISOString(),
       publicKey:[
@@ -79,52 +73,61 @@ export class DIDSeedDocument extends DIDDocument {
       signatureValue:signedMsg2.auth.sign,
     };
     didDoc.proof.push(proof2);
-    super.didDoc_ = didDoc;
+    this.didDoc_ = didDoc;
     return didDoc;
   }
 }
 
-export class DIDLinkedDocument extends DIDDocument {
+export class DIDLinkedDocument {
   static debug = true;
   constructor(evidence,cb) {
     if(DIDLinkedDocument.debug) {
       console.log('DIDLinkedDocument::constructor:evidence=<',evidence,'>');
     }
-    super(evidence.id);
+    this.address_ = evidence.id;
     this.didDoc_ = evidence;
   }
+  address() {
+    return this.address_;
+  }
   document() {
+    if(DIDLinkedDocument.debug) {
+      console.log('DIDLinkedDocument::document:this.didDoc_=<',this.didDoc_,'>');
+    }
     return this.didDoc_;
   }
 }
 
 
-export class DIDGuestDocument extends DIDDocument {
+export class DIDGuestDocument {
   static debug = true;
-  constructor(id,cb) {
+  constructor(address,cb) {
+    this.address_ = address;
     this.massAuth_ = new MassStore(null,cb);
-    super(id);
+  }
+  address() {
+    return this.address_;
   }
   document() {
     const didDoc = {
       '@context':'https://www.wator.xyz/maap/',
-      id:super.address(),
+      id:this.address(),
       version:1.0,
       created:(new Date()).toISOString(),
       publicKey:[
         {
-          id:`${super.address()}#${this.massAuth_.address()}`,
+          id:`${this.address()}#${this.massAuth_.address()}`,
           type: 'ed25519',
           controller: `${this.massAuth_.address()}`,
           publicKeyBase64: this.massAuth_.pub(),
         }
       ],
       authentication:[
-        `${super.address()}#${this.massAuth_.address()}`,
+        `${this.address()}#${this.massAuth_.address()}`,
       ],
       service: [
         {
-          id:`${super.address()}#${this.massAuth_.address()}`,
+          id:`${this.address()}#${this.massAuth_.address()}`,
           type: 'mqtturi',
           serviceEndpoint: 'wss://wator.xyz:8084/jwt',
           serviceMqtt:{

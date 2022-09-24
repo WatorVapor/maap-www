@@ -5,7 +5,7 @@ console.log('::::gMassWorker=<',gMassWorker,'>');
 
 export class MassStore {
   static trace = false;
-  static debug = true;
+  static debug = false;
   constructor(keyAddress,readycb) {
     this.readyCB_ = readycb;
     if(keyAddress) {

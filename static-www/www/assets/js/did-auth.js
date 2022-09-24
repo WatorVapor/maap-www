@@ -24,4 +24,7 @@ export class DIDAuth {
   createDid() {
     this.cov_.createSeed();
   }
+  joinDid(id) {
+    this.cov_.joinDid(id);
+  }
 }

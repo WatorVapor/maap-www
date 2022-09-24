@@ -61,6 +61,7 @@ window.onUIClickCreateDid = (elem) => {
     spinElem.setAttribute('class','spinner-border text-success ');
     gDidAuth.createDid();
     spinElem.setAttribute('class','spinner-border text-success d-none');
+    location.reload();
   } catch(err) {
     console.error('onUIClickCreateDid::err=<',err,'>');
   }
@@ -212,36 +213,32 @@ const ScanQRCode = (video,preview) => {
   }
 }
 
-window.onUIChangeTextSecretKey = async (elem) => {
-  console.log('onUIChangeTextSecretKey::elem=<',elem,'>');
-  const keyText = elem.textContent.trim(); 
-  console.log('onUIChangeTextSecretKey::keyText=<',keyText,'>');
-  if(edAuth) {
-    const goodKey = edAuth.verifySecretKey(keyText);
-    console.log('onUIChangeTextSecretKey::goodKey=<',goodKey,'>');
-    if(goodKey) {
-      enableImportKey();
-    }
-  }
+window.onUIChangeTextDid = async (elem) => {
+  console.log('onUIChangeTextDid::elem=<',elem,'>');
+  const didText = elem.textContent.trim(); 
+  console.log('onUIChangeTextDid::didText=<',didText,'>');
+  enableJoinDid(elem);
 }
 
-const enableImportKey = ()=> {
-  const importBtn = document.getElementById('evt-btn-import-gravition-secret');
-  console.log('enableImportKey::importBtn=<',importBtn,'>');
-  if(importBtn) {
-    importBtn.removeAttribute('disabled');
+const enableJoinDid = (elem)=> {
+  const rootElem = elem.parentElement.parentElement.parentElement;
+  console.log('enableJoinDid::rootElem=<',rootElem,'>');
+  const joinBtns = rootElem.getElementsByTagName('button');
+  console.log('enableJoinDid::joinBtns=<',joinBtns,'>');
+  if(joinBtns.length >1) {
+    joinBtns[1].removeAttribute('disabled');
   }  
 }
 
 
-window.onUIClickImportGravitionSecret = async (elem) => {
-  console.log('onUIClickImportGravitionSecret::elem=<',elem,'>');
-  const keyTextArea = elem.parentElement.parentElement.getElementsByTagName('textarea')[0];
-  if(keyTextArea && edAuth) {
-    console.log('onUIClickImportGravitionSecret::keyTextArea=<',keyTextArea,'>');
-    const keyText = keyTextArea.textContent.trim();
-    console.log('onUIClickImportGravitionSecret::keyText=<',keyText,'>');
-    const isImported = edAuth.importSecretKey(keyText);
-    console.log('onUIClickImportGravitionSecret::isImported=<',isImported,'>');
+window.onUIClickJoinDid = async (elem) => {
+  console.log('onUIClickJoinDid::elem=<',elem,'>');
+  const didInput = elem.parentElement.parentElement.getElementsByTagName('input')[0];
+  console.log('onUIClickJoinDid::didInput=<',didInput,'>');
+  if(didInput && gDidAuth) {
+    console.log('onUIClickJoinDid::didInput=<',didInput,'>');
+    const didText = didInput.value.trim();
+    console.log('onUIClickJoinDid::didText=<',didText,'>');
+    gDidAuth.joinDid(didText);
   }
 }
