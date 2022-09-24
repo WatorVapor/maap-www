@@ -53,7 +53,7 @@ const createAccountApp_ = async ()=> {
 }
 
 
-window.onUIClickCreateDid = (elem) => {
+window.onUIClickCreateDid = async (elem) => {
   console.log('onUIClickCreateDid::elem=<',elem,'>');
   try {
     const spinElem = elem.parentElement.getElementsByTagName('div')[0];
@@ -61,7 +61,11 @@ window.onUIClickCreateDid = (elem) => {
     spinElem.setAttribute('class','spinner-border text-success ');
     gDidAuth.createDid();
     spinElem.setAttribute('class','spinner-border text-success d-none');
-    location.reload();
+    gApp.token.didAuth.didText = gDidAuth.address();
+    const qrcode = await new QRCode.toDataURL(gDidAuth.address());
+    gApp.token.didAuth.didQR = qrcode;
+    gApp.token.didAuth.didDocumentJson = JSON.stringify(gDidAuth.document(),undefined,2);
+    //location.reload();
   } catch(err) {
     console.error('onUIClickCreateDid::err=<',err,'>');
   }

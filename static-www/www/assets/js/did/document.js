@@ -1,4 +1,4 @@
-import {MassStore} from '../gravity/mass-store.js';
+import {MassStore} from './mass-store.js';
 export class DIDDocument {
   static debug = true;
   static did_method = 'maap';
@@ -84,8 +84,14 @@ export class DIDLinkedDocument {
     if(DIDLinkedDocument.debug) {
       console.log('DIDLinkedDocument::constructor:evidence=<',evidence,'>');
     }
+    this.cb_ = cb;
     this.address_ = evidence.id;
     this.didDoc_ = evidence;
+    setTimeout(()=> {
+      if(typeof this.cb_ === 'function') {
+        this.cb_();
+      }
+    },1);
   }
   address() {
     return this.address_;

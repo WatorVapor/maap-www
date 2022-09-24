@@ -6,8 +6,9 @@ export const data = {
     didLoadQRFile:'加载DID二维码文件',
     didText:'DID标识符',
     join:'加入',
+    didMineCode:'我的DID标识符',
+    didMineQR:'我的DID二维码',
     didDocumentMine:'我的DID文档',
-    didMine:'我的DID',
     didDocumentDetails:'DID文档详细',
     
     keyImport:'导入已存账户',

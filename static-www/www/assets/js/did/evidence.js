@@ -1,5 +1,5 @@
-import {MassStore} from '../gravity/mass-store.js';
 import {DIDSeedDocument,DIDLinkedDocument,DIDGuestDocument} from './document.js';
+import {Graviton} from './graviton.js';
 
 export class Evidence {
   static trace = false;
@@ -7,9 +7,6 @@ export class Evidence {
   static did_method = 'maap';
   constructor(docJson,cb) {
     this.good = false;
-    if(Evidence.trace) {
-      console.log('Evidence::constructor:MassStore=<',MassStore,'>');
-    }
     if(Evidence.debug) {
       console.log('Evidence::constructor:docJson=<',docJson,'>');
     }
@@ -41,7 +38,8 @@ export class Evidence {
     if(Evidence.debug) {
       console.log('Evidence::createFromJson_:docJson=<',docJson,'>');
     }
-    this.didDoc_ = new DIDLinkedDocument(docJson,cb);
+    this.stage_ = docJson.stage;
+    this.didDoc_ = new DIDLinkedDocument(docJson.didDoc,cb);
   }
   createSeed_(cb) {
     this.didDoc_ = new DIDSeedDocument(cb);
@@ -86,7 +84,11 @@ export class ChainOfEvidence {
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::createSeed:doc=<',doc,'>');
       }
-      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(doc));
+      const saveEvidence = {
+        stage:'stable',
+        didDoc:doc,
+      };
+      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(saveEvidence));
     });
   }
   joinDid(id) {
@@ -96,30 +98,48 @@ export class ChainOfEvidence {
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::joinDid:doc=<',doc,'>');
       }
-      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(doc));
+      const saveEvidence = {
+        stage:'guest',
+        didDoc:doc,
+      };
+      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(saveEvidence));
     });
   }
   
-  
   loadEvidence_() {
     const topEviStr = localStorage.getItem(constDIDAuthEvidenceTop);
-    if(ChainOfEvidence.debug) {
+    if(ChainOfEvidence.trace) {
       console.log('ChainOfEvidence::loadEvidence_:topEviStr=<',topEviStr,'>');
     }
     if(topEviStr) {
       const topEviJson = JSON.parse(topEviStr);
-      if(ChainOfEvidence.debug) {
+      if(ChainOfEvidence.trace) {
         console.log('ChainOfEvidence::loadEvidence_:topEviJson=<',topEviJson,'>');
       }
       if(topEviJson) {
+        const self = this;
         this.topEvidence_ = new Evidence(topEviJson,()=>{
           const doc = this.topEvidence_.document();
-          if(ChainOfEvidence.debug) {
-            console.log('ChainOfEvidence::createSeed:doc=<',doc,'>');
-          }          
+          if(ChainOfEvidence.trace) {
+            console.log('ChainOfEvidence::loadEvidence_:doc=<',doc,'>');
+          }
+          self.createConnection_(doc);
         });
       }
     } else {
     }
   }
+  createConnection_(didDoc) {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::createConnection_:didDoc=<',didDoc,'>');
+    }
+    const self = this;
+    this.graviton_ = new Graviton(didDoc,()=>{
+      self.graviton_.ready = true;
+    });
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::createConnection_:this.graviton_=<',this.graviton_,'>');
+    }
+  }
 }
+
