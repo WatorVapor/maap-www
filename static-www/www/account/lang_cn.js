@@ -11,7 +11,7 @@ export const data = {
     didDocumentMine:'我的DID文档',
     didDocumentDetails:'DID文档详细',
 
-    help:'关于DID账户介绍',
+    about:'基于DID用于多设备认证系统介绍',
     
     keyImport:'导入已存账户',
     importApply:'导入',
