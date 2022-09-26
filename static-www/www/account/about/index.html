@@ -1,26 +1,30 @@
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.css" integrity="sha256-LoLURa1YeOqIFlJHDOYyYB+PVfG5nm6+zf+GFGAObQ4=" crossorigin="anonymous">
-
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark" id="vue-navbar-top">
       <w-navbar></w-navbar>
     </nav>
     <div class="container-fluid mt-5 pt-4">
       <div class="row justify-content-center">
         <div class="col-10 d-flex justify-content-center">
-          <div id="did-arch" style="width: 960px;height: 540px;border: 1px solid lightgray;"></div>
+          <h3>
+          随着个人拥有的设备越来越多，一个人可能拥有一台乃至数台各种类型设备，比如手机，桌面电脑，便携电脑，电视盒子，
+          单板电脑（树莓派，香蕉派，香橙派），本系统实现把这些个设备组织成一个完全受创建者控制的组。
+          认证部分是基于DID规范数字签名，通信部分基于有访问控制表的MQTT通信。
+          </h3>
+        </div>
+      </div>
+      <hr/>
+      <div class="row justify-content-center">
+        <div class="col-10 d-flex justify-content-center">
+          <div id="did-arch" style="width: 1440px;height: 810px;border: 1px solid lightgray;"></div>
+        </div>
+      </div>
+      <hr/>
+      <div class="row justify-content-center">
+        <div class="col-10 d-flex justify-content-center">
+          <div id="did-document" style="width: 1440px;height: 810px;border: 1px solid lightgray;"></div>
         </div>
       </div>
     </div>
-    <!--
-    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.js" integrity="sha256-bjCiNQR0zfkqCTLG1VuK3LkZKQZoF+0+7HuHkHpGEvM=" crossorigin="anonymous"></script>
-    -->
-    
-    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/standalone/umd/vis-network.min.js" integrity="sha256-Nym+LzmUyDIpEGw9NPuN6AdXLPbygsI+KzTs9OhM6GM=" crossorigin="anonymous"></script>
-    
-
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://unpkg.com/viz.js@1.8.2/viz.js" type="javascript/worker"></script>
-    <script src="https://unpkg.com/d3-graphviz@2.6.1/build/d3-graphviz.js"></script>
-
-
-    
+    <script src="https://unpkg.com/d3-graphviz@2.6.1/build/d3-graphviz.js"></script>    
     <script src="./about.js"></script>
