@@ -1,18 +1,82 @@
 export class Graviton {
-  static trace = false;
+  static trace = true;
   static debug = true;
-  constructor(didDoc,cb) {
+  constructor(evidences,cb) {
     if(Graviton.trace) {
-      console.log('Graviton::constructor:didDoc=<',didDoc,'>');
+      console.log('Graviton::constructor:evidences=<',evidences,'>');
     }
-    this.didDoc_ = didDoc;
+    this.evidences_ = evidences;
     this.cb_ = cb;
     this.reqMqttAuthOfJwt_();
     //this.createMqttClient_();
   }
   reqMqttAuthOfJwt_() {
-    
+    if(Graviton.trace) {
+      console.log('Graviton::reqMqttAuthOfJwt_:this.evidences_=<',this.evidences_,'>');
+    }
+    if(this.evidences_.length > 0 && this.evidences_[0].service.length > 0) {
+      this.mqttJwt_ = this.evidences_[0].service[0].serviceEndpoint;
+      if(Graviton.trace) {
+        console.log('Graviton::reqMqttAuthOfJwt_:this.mqttJwt_=<',this.mqttJwt_,'>');
+        this.createMqttAuthOfJwtConnection_();
+      }
+    } else {
+      if(typeof this.cb_ === 'function') {
+        this.cb_(false);
+      }
+    }
   }
+  createMqttAuthOfJwtConnection_() {
+    if(Graviton.trace) {
+      console.log('Graviton::createMqttAuthOfJwtConnection_:this.mqttJwt_=<',this.mqttJwt_,'>');
+    }    
+    const wsClient = new WebSocket(this.mqttJwt_);
+    if(Graviton.debug) {
+      console.log('Graviton::wsClient=<',wsClient,'>');
+    }
+    const self = this;
+    wsClient.onopen = (evt)=> {
+      if(Graviton.debug) {
+        console.log('Graviton::createMqttAuthOfJwtConnection_::onopen:evt=<',evt,'>');
+      }
+      setTimeout(()=>{
+        self.onMqttJwtChannelOpened_(wsClient);
+      },100)
+    }
+    wsClient.onclose = (evt)=> {
+      if(Graviton.debug) {
+        console.log('Graviton::createMqttAuthOfJwtConnection_::onclose:evt=<',evt,'>');
+      }
+    }
+    wsClient.onerror = (err)=> {
+      console.error('Graviton::createMqttAuthOfJwtConnection_::onerror:err=<',err,'>');
+    }
+    wsClient.onmessage = (evt)=> {
+      if(Graviton.debug) {
+        console.log('Graviton::createMqttAuthOfJwtConnection_::onmessage:evt=<',evt,'>');
+      }
+      try {
+        const msg = JSON.parse(evt.data);
+        if(Graviton.debug) {
+          console.log('Graviton::createMqttAuthOfJwtConnection_::onmessage:msg=<',msg,'>');
+        }
+        if(msg.jwt && msg.payload) {
+          onMqttJwtReply_(msg.jwt,msg.payload,evt.data);
+        }
+      } catch(err) {
+        console.error('Graviton::createMqttAuthOfJwtConnection_::onmessage:err=<',err,'>');
+      }
+    }
+
+  }
+  onMqttJwtChannelOpened_ (wsClient) {
+    if(Graviton.debug) {
+      console.log('onMqttJwtChannelOpened_::wsClient=<',wsClient,'>');
+      console.log('onMqttJwtChannelOpened_::this.evidences_=<',this.evidences_,'>');
+    }
+    wsClient.send(JSON.stringify(this.evidences_));
+  }
+  
   createMqttClient_() {
     const keyPath = `${constMansionMqttJwtPrefix}/${this.mass_.address_}`
     if(Graviton.trace) {

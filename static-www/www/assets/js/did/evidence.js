@@ -87,6 +87,7 @@ export class ChainOfEvidence {
       const saveEvidence = {
         stage:'stable',
         didDoc:doc,
+        parent:false,
       };
       localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(saveEvidence));
     });
@@ -101,6 +102,7 @@ export class ChainOfEvidence {
       const saveEvidence = {
         stage:'guest',
         didDoc:doc,
+        parent:false,
       };
       localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(saveEvidence));
     });
@@ -123,19 +125,23 @@ export class ChainOfEvidence {
           if(ChainOfEvidence.trace) {
             console.log('ChainOfEvidence::loadEvidence_:doc=<',doc,'>');
           }
-          self.createConnection_(doc);
+          self.createConnection_(this.topEvidence_);
         });
       }
     } else {
     }
   }
-  createConnection_(didDoc) {
+  createConnection_(topEvid) {
     if(ChainOfEvidence.debug) {
-      console.log('ChainOfEvidence::createConnection_:didDoc=<',didDoc,'>');
+      console.log('ChainOfEvidence::createConnection_:topEvid=<',topEvid,'>');
     }
+    const evidences = [this.topEvidence_.document()];
     const self = this;
-    this.graviton_ = new Graviton(didDoc,()=>{
-      self.graviton_.ready = true;
+    this.graviton_ = new Graviton(evidences,(good)=>{
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::createConnection_:good=<',good,'>');
+      }
+      self.graviton_.ready = good;
     });
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::createConnection_:this.graviton_=<',this.graviton_,'>');

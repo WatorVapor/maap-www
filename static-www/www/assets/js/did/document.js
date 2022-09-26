@@ -1,7 +1,11 @@
 import {MassStore} from './mass-store.js';
+
 export class DIDDocument {
   static debug = true;
   static did_method = 'maap';
+  static did_context = 'https://www.wator.xyz/maap/';
+  static did_mqtt_end_point = 'wss://wator.xyz:8084/jwt/did';
+  static did_mqtt_uri = 'wss://wator.xyz:8084/mqtt';
   constructor() {
   }
 }
@@ -16,38 +20,39 @@ export class DIDSeedDocument {
     return `did:${DIDDocument.did_method}:${this.massAuth_.address()}`;
   }
   document() {
+    const didCode = `did:${DIDDocument.did_method}:${this.massAuth_.address()}`;
     const didDoc = {
-      '@context':'https://www.wator.xyz/maap/',
-      id:`did:${DIDDocument.did_method}:${this.massAuth_.address()}`,
+      '@context':`${DIDDocument.did_context}`,
+      id:didCode,
       version:1.0,
       created:(new Date()).toISOString(),
       publicKey:[
         {
-          id:`${this.massAuth_.address()}#${this.massAuth_.address()}`,
+          id:`${didCode}#${this.massAuth_.address()}`,
           type: 'ed25519',
           controller: `${this.massAuth_.address()}`,
           publicKeyBase64: this.massAuth_.pub(),
         },
         {
-          id:`${this.massRecovery_.address()}#${this.massRecovery_.address()}`,
+          id:`${didCode}#${this.massRecovery_.address()}`,
           type: 'ed25519',
           controller: `${this.massRecovery_.address()}`,
           publicKeyBase64: this.massRecovery_.pub(),
         },
       ],
       authentication:[
-        `${this.massAuth_.address()}#${this.massAuth_.address()}`,
+        `${didCode}#${this.massAuth_.address()}`,
       ],
       recovery:[
-       `${this.massRecovery_.address()}#${this.massRecovery_.address()}`,
+       `${didCode}#${this.massRecovery_.address()}`,
      ],
       service: [
         {
-          id:`${this.massAuth_.address()}#${this.massAuth_.address()}`,
+          id:`${didCode}#${this.massAuth_.address()}`,
           type: 'mqtturi',
-          serviceEndpoint: 'wss://wator.xyz:8084/jwt',
+          serviceEndpoint: `${DIDDocument.did_mqtt_end_point}`,
           serviceMqtt:{
-            uri:'wss://wator.xyz:8084/mqtt',
+            uri:`${DIDDocument.did_mqtt_uri}`,
             acl:{
               all:[
                 '${username}/#',
@@ -57,22 +62,16 @@ export class DIDSeedDocument {
         },
       ],
     };
-    didDoc.proof = [];
+    const proofs = [];
     const signedMsg = this.massAuth_.signWithoutTS(didDoc);
     const proof = {
       type:'ed25519',
-      creator:`${this.address()}#${this.massAuth_.address_}`,
+      creator:`${didCode}#${this.massAuth_.address_}`,
       signatureValue:signedMsg.auth.sign,
     };
-    didDoc.proof.push(proof);
+    proofs.push(proof);
     
-    const signedMsg2 = this.massRecovery_.signWithoutTS(didDoc);
-    const proof2 = {
-      type:'ed25519',
-      creator:`${this.address()}#${this.massRecovery_.address_}`,
-      signatureValue:signedMsg2.auth.sign,
-    };
-    didDoc.proof.push(proof2);
+    didDoc.proof = proofs;
     this.didDoc_ = didDoc;
     return didDoc;
   }
@@ -116,7 +115,7 @@ export class DIDGuestDocument {
   }
   document() {
     const didDoc = {
-      '@context':'https://www.wator.xyz/maap/',
+      '@context':`${DIDDocument.did_context}`,
       id:this.address(),
       version:1.0,
       created:(new Date()).toISOString(),
@@ -135,9 +134,9 @@ export class DIDGuestDocument {
         {
           id:`${this.address()}#${this.massAuth_.address()}`,
           type: 'mqtturi',
-          serviceEndpoint: 'wss://wator.xyz:8084/jwt',
+          serviceEndpoint: `${DIDDocument.did_mqtt_end_point}`,
           serviceMqtt:{
-            uri:'wss://wator.xyz:8084/mqtt',
+            uri:`${DIDDocument.did_mqtt_uri}`,
             acl:{
               all:[
                 '${username}/guest/#',
@@ -147,14 +146,15 @@ export class DIDGuestDocument {
         },
       ],
     };
-    didDoc.proof = [];
+    const proofs = [];
     const signedMsg = this.massAuth_.signWithoutTS(didDoc);
     const proof = {
       type:'ed25519',
       creator:`${this.address()}#${this.massAuth_.address_}`,
       signatureValue:signedMsg.auth.sign,
     };
-    didDoc.proof.push(proof);
+    proofs.push(proof);
+    didDoc.proof = proofs;
     super.didDoc_ = didDoc;
     return didDoc;
   }
