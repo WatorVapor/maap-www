@@ -31,3 +31,14 @@ const constDIDAuthCurrentDoc = 'maap/didauth/current/document';
 const constDIDAuthEvidenceTop = 'maap/didauth/evidence/top';
 
 const constDIDAuthMassStore = 'maap/didauth/mass/store';
+
+
+
+const constDIDTeamAuthName = 'maap/didteam/auth/name';
+const constDIDTeamAuthMassPrefix = 'maap/didteam/auth/mass';
+const constDIDTeamAuthCurrentDid = 'maap/didteam/auth/current/did';
+const constDIDTeamAuthCurrentDoc = 'maap/didteam/auth/current/document';
+const constDIDTeamAuthEvidenceTop = 'maap/didteam/auth/evidence/top';
+
+const constDIDTeamAuthMassStore = 'maap/didteam/auth/mass/store';
+const constDIDTeamAuthGravitonJwtPrefix = 'maap/didteam/auth/graviton/jwt';

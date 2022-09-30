@@ -1,7 +1,9 @@
 export const data = {
   account:{
-    createDid:'创建新DID',
-    joinDid:'加入已存DID',
+    didTeamTitle:'DID小队认证',
+    didTeamDetail:'DID小队认证是 基于DID的多设备认证系统。 多个个人设备在此系统下可以自我组织成设备的小组，不需要其他系统进行认证。安全完全自己控制。可以版个人用的手机，平板，桌面电脑，移动电脑，单板电脑（树莓派，香橙派等），组成安全，不受他人控制的IT设备组，这个系统简称DID小队系统。',
+    createDidTeam:'创建新的DID小队',
+    joinDidTeam:'加入已存DID小队',
     didQRScan:'扫描DID二维码',
     didLoadQRFile:'加载DID二维码文件',
     didText:'DID标识符',
@@ -11,7 +13,7 @@ export const data = {
     didDocumentMine:'我的DID文档',
     didDocumentDetails:'DID文档详细',
 
-    about:'基于DID用于多设备认证系统介绍',
+    aboutDidTeam:'DID小队认证技术详细介绍',
     
     keyImport:'导入已存账户',
     importApply:'导入',

@@ -55,7 +55,7 @@ export class DIDSeedDocument {
             uri:`${DIDDocument.did_mqtt_uri}`,
             acl:{
               all:[
-                '${username}/#',
+              `${didCode}/#`,
               ]
             }
           }
@@ -139,7 +139,7 @@ export class DIDGuestDocument {
             uri:`${DIDDocument.did_mqtt_uri}`,
             acl:{
               all:[
-                '${username}/guest/#',
+                `${this.address()}/guest/#`,
               ]
             }
           }

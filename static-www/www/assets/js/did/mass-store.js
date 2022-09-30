@@ -1,7 +1,23 @@
 const iConstOneDayMs = 1000*3600*24;
-window.nacl = nacl;
-const gMassWorker = new Worker('/maap/assets/js/gravity/mass-worker.js',{ type: 'module' });
-//console.log('::::gMassWorker=<',gMassWorker,'>');
+
+const gMassWorker = new Worker('/maap/assets/js/did/mass-worker.js',{ type: 'module' });
+console.log('::::gMassWorker=<',gMassWorker,'>');
+gMassWorker.addEventListener('message', (evt) => {
+  console.log('::gMassWorker::evt=<',evt,'>');
+  if(evt.data.publicKey) {
+    onMineEd25519Key(evt.data.publicKey,evt.data.secretKey);
+  }
+});
+gMassWorker.postMessage({cmd:'createKey'});
+gMassWorker.onerror  = (err)=> {
+  console.error('::gMassWorker::err=<',err,'>');  
+}
+
+const onMineEd25519Key = (publicKey,secretKey) => {
+  console.log('::onMineEd25519Key::publicKey=<',publicKey,'>');
+  console.log('::onMineEd25519Key::secretKey=<',secretKey,'>');
+}
+
 
 export class MassStore {
   static trace = false;
@@ -137,22 +153,11 @@ export class MassStore {
     localforage.removeItem(this.publicKeyPath_);
     localforage.removeItem(this.addressPath_);
   }
-  verifySecretKey(secretKey) {
-    if(MassStore.debug) {
-      console.log('MassStore::verifySecretKey::secretKey=<',secretKey,'>');
-    }
-    const secretBin = nacl.util.decodeBase64(secretKey);
-    if(MassStore.debug) {
-      console.log('MassStore::verifySecretKey::secretBin=<',secretBin,'>');
-    }
-    const keyPair = nacl.sign.keyPair.fromSecretKey(secretBin);
-    if(MassStore.debug) {
-      console.log('MassStore::verifySecretKey::keyPair=<',keyPair,'>');
-    }
-    if(keyPair) {
-      return true;
-    }
-    return false;
+  randomId() {
+    const randomBytes = nacl.randomBytes(1024);
+    const randomB64 = nacl.util.encodeBase64(randomBytes);
+    const randomAdd = this.calcAddress_(randomB64);
+    return randomAdd;
   }
   
   async createMassStoreKey_() {
@@ -245,7 +250,7 @@ export class MassStore {
       console.error('MassStore::loadMassStoreKey_:err=<',err,'>');
       return false;
     }
-    if(MassStore.debug) {
+    if(MassStore.trace) {
       console.log('MassStore::loadMassStoreKey_:this.readyCB_=<',this.readyCB_,'>');
     }    
     if(typeof this.readyCB_ === 'function') {
