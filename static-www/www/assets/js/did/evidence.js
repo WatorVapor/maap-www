@@ -5,6 +5,7 @@ export class Evidence {
   static trace = false;
   static debug = true;
   static did_method = 'maap';
+  static did_resolve = 'wss://wator.xyz:8084/jwt/did';
   constructor(docJson,cb) {
     this.good = false;
     if(Evidence.debug) {
@@ -78,7 +79,7 @@ export class ChainOfEvidence {
     }
     return {};
   }
-  createSeed() {
+  createSeed(cb) {
     this.topEvidence_ = new Evidence(null,()=> {
       const doc = this.topEvidence_.document();
       if(ChainOfEvidence.debug) {
@@ -90,6 +91,9 @@ export class ChainOfEvidence {
         parent:false,
       };
       localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(saveEvidence));
+      if(typeof cb === 'function') {
+        cb();
+      }
     });
   }
   joinDid(id) {
@@ -137,7 +141,7 @@ export class ChainOfEvidence {
     }
     const evidences = [this.topEvidence_.document()];
     const self = this;
-    this.graviton_ = new Graviton(evidences,(good)=>{
+    this.graviton_ = new Graviton(evidences,Evidence.did_resolve,(good)=>{
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::createConnection_:good=<',good,'>');
       }

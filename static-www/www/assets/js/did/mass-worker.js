@@ -1,10 +1,11 @@
-import nacl from 'https://cdn.jsdelivr.net/npm/tweetnacl-es6@1.0.3/nacl-fast-es.min.js';
-console.log('::::nacl=<',nacl,'>');
-
 const MassWoker = {
-  trace:true,
-  debug:true
+  trace:false,
+  debug:false
 };
+import nacl from 'https://cdn.jsdelivr.net/npm/tweetnacl-es6@1.0.3/nacl-fast-es.min.js';
+if(MassWoker.trace) {
+  console.log('::::nacl=<',nacl,'>');
+}
 
 const createMassKey_ = () => {
   const keyPair = nacl.sign.keyPair();
@@ -15,7 +16,9 @@ const createMassKey_ = () => {
 }
 
 self.addEventListener('message', (e) =>{
-  console.log('MassWoker::::e=<',e,'>');
+  if(MassWoker.trace) {
+    console.log('MassWoker::::e=<',e,'>');
+  }
   if(e.data.cmd === 'createKey') {
     createMassKey_();
   }  

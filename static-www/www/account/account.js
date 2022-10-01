@@ -53,21 +53,21 @@ const createAccountApp_ = async ()=> {
 }
 
 
-window.onUIClickCreateDid = async (elem) => {
-  console.log('onUIClickCreateDid::elem=<',elem,'>');
+window.onUIClickCreateDidTeam = (elem) => {
+  console.log('onUIClickCreateDidTeam::elem=<',elem,'>');
   try {
     const spinElem = elem.parentElement.getElementsByTagName('div')[0];
-    console.log('onUIClickCreateDid::spinElem=<',spinElem,'>');
+    console.log('onUIClickCreateDidTeam::spinElem=<',spinElem,'>');
     spinElem.setAttribute('class','spinner-border text-success ');
-    gDidTeam.createDid();
-    spinElem.setAttribute('class','spinner-border text-success d-none');
-    gApp.token.didAuth.didText = gDidTeam.address();
-    const qrcode = await new QRCode.toDataURL(gDidTeam.address());
-    gApp.token.didAuth.didQR = qrcode;
-    gApp.token.didAuth.didDocumentJson = JSON.stringify(gDidTeam.document(),undefined,2);
-    //location.reload();
+    gDidTeam.createDid( async()=>{
+      spinElem.setAttribute('class','spinner-border text-success d-none');
+      gApp.token.didAuth.didText = gDidTeam.address();
+      const qrcode = await new QRCode.toDataURL(gDidTeam.address());
+      gApp.token.didAuth.didQR = qrcode;
+      gApp.token.didAuth.didDocumentJson = JSON.stringify(gDidTeam.document(),undefined,2);      
+    });
   } catch(err) {
-    console.error('onUIClickCreateDid::err=<',err,'>');
+    console.error('onUIClickCreateDidTeam::err=<',err,'>');
   }
 }
 

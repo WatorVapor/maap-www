@@ -21,10 +21,10 @@ export class DIDTeamAuth {
     DIDTeamAuth.name_ = name;
     localStorage.setItem(constDIDAuthName,name);
   }
-  createDid() {
-    this.cov_.createSeed();
+  createDid(cb) {
+    this.cov_.createSeed(cb);
   }
-  joinDid(id) {
-    this.cov_.joinDid(id);
+  joinDid(id,cb) {
+    this.cov_.joinDid(id,cb);
   }
 }

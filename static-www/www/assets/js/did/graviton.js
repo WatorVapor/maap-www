@@ -5,12 +5,13 @@ const iConstOneHourInMs  = 1000 * 3600;
 export class Graviton {
   static trace = false;
   static debug = true;
-  constructor(evidences,cb) {
+  constructor(evidences,resolve,cb) {
     if(Graviton.trace) {
       console.log('Graviton::constructor:evidences=<',evidences,'>');
     }
     this.evidences_ = evidences;
     this.cb_ = cb;
+    this.mqttJwt_ = resolve;
     this.mass_ = false;
     const self = this;
     this.searchMassOfMine_((mass)=>{
@@ -102,17 +103,7 @@ export class Graviton {
     if(Graviton.trace) {  
       console.log('Graviton::reqMqttAuthOfJwt_:this.evidences_=<',this.evidences_,'>');
     }
-    if(this.evidences_.length > 0 && this.evidences_[0].service.length > 0) {
-      this.mqttJwt_ = this.evidences_[0].service[0].serviceEndpoint;
-      if(Graviton.trace) {
-        console.log('Graviton::reqMqttAuthOfJwt_:this.mqttJwt_=<',this.mqttJwt_,'>');
-      }
-      this.createMqttAuthOfJwtConnection_();
-    } else {
-      if(typeof this.cb_ === 'function') {
-        this.cb_(false);
-      }
-    }
+    this.createMqttAuthOfJwtConnection_();
   }
   createMqttAuthOfJwtConnection_() {
     if(Graviton.trace) {
@@ -217,9 +208,17 @@ export class Graviton {
     this.mqttClient_.on('message', (channel, message) => {
       self.onMqttMessage_(channel, message);
     });
-    const topics = [
-      `${this.did_}/#`,
-    ];
+    const topics = [];
+    if(payload.acl && payload.acl.all) {
+      for(const topic of payload.acl.all) {
+        topics.push(topic);
+      }
+    }
+    if(payload.acl && payload.acl.sub) {
+      for(const topic of payload.acl.sub) {
+        topics.push(topic);
+      }
+    }
     this.mqttClient_.subscribe(topics,{qos:1,nl:true},(err, granted)=>{
       if(err) {
         console.error('Graviton::createMqttConnection_ subscribe err:=<', err, '>');

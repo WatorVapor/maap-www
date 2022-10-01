@@ -1,24 +1,5 @@
 const iConstOneDayMs = 1000*3600*24;
 
-const gMassWorker = new Worker('/maap/assets/js/did/mass-worker.js',{ type: 'module' });
-console.log('::::gMassWorker=<',gMassWorker,'>');
-gMassWorker.addEventListener('message', (evt) => {
-  console.log('::gMassWorker::evt=<',evt,'>');
-  if(evt.data.publicKey) {
-    onMineEd25519Key(evt.data.publicKey,evt.data.secretKey);
-  }
-});
-gMassWorker.postMessage({cmd:'createKey'});
-gMassWorker.onerror  = (err)=> {
-  console.error('::gMassWorker::err=<',err,'>');  
-}
-
-const onMineEd25519Key = (publicKey,secretKey) => {
-  console.log('::onMineEd25519Key::publicKey=<',publicKey,'>');
-  console.log('::onMineEd25519Key::secretKey=<',secretKey,'>');
-}
-
-
 export class MassStore {
   static trace = false;
   static debug = true;
@@ -161,11 +142,9 @@ export class MassStore {
   }
   
   async createMassStoreKey_() {
-    //gMassWorker.postMessage('startMineKey');
-    const keyPair = this.mineMassStoreKey_();
-    await this.save2Storage_(keyPair);
-    await this.loadMassStoreKey_();
+    this.mineMassStoreKey_();
   }
+  /*
   mineMassStoreKey_() {
     while(true) {
       const keyPair = nacl.sign.keyPair();
@@ -182,14 +161,42 @@ export class MassStore {
       }
     }
   }
-  /*
+  */
+  
   mineMassStoreKey_() {
-    const keyPair = window.crypto.subtle.generateKey('ed25519', true , ['sign', 'verify']);
-    if(MassStore.debug) {
-      console.log('MassStore::mineMassStoreKey_:keyPair=<',keyPair,'>');
+    const mineWorker = new Worker('/maap/assets/js/did/mass-worker.js',{ type: 'module' });
+    if(MassStore.trace) {
+      console.log('MassStore::mineMassStoreKey_::mineWorker=<',mineWorker,'>');
     }
-  }
-  */  
+    const self = this;
+    mineWorker.addEventListener('message', async (evt) => {
+      if(MassStore.trace) {
+        console.log('MassStore::mineMassStoreKey_::evt=<',evt,'>');
+      }
+      const publicKey = evt.data.publicKey;
+      if(publicKey) {
+        const b64Pub = nacl.util.encodeBase64(publicKey);
+        if(MassStore.trace) {
+          console.log('MassStore::mineMassStoreKey_:b64Pub=<',b64Pub,'>');
+        }
+        const address = self.calcAddress_(b64Pub);
+        if(address.startsWith('mp')) {
+          const keyPair = {
+            secretKey:evt.data.secretKey,
+            publicKey:evt.data.publicKey
+          }
+          await self.save2Storage_(keyPair);
+          await self.loadMassStoreKey_();
+        } else {
+          mineWorker.postMessage({cmd:'createKey'});
+        }
+      }
+    });
+    mineWorker.postMessage({cmd:'createKey'});
+    mineWorker.onerror  = (err)=> {
+      console.error('MassStore::mineMassStoreKey_::err=<',err,'>');  
+    }
+  }  
   async save2Storage_(keyPair){
     const b64Pri = nacl.util.encodeBase64(keyPair.secretKey);
     if(MassStore.debug) {
