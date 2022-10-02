@@ -57,8 +57,9 @@ export class Evidence {
 export class ChainOfEvidence {
   static trace = false;
   static debug = true;
-  constructor() {
+  constructor(cb) {
     this.topEvidence_ = false;
+    this.cb_ = cb;
     this.loadEvidence_();
   }
   address() {
@@ -111,6 +112,36 @@ export class ChainOfEvidence {
       localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(saveEvidence));
     });
   }
+  isMember() {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::isMember:this.topEvidence_=<',this.topEvidence_,'>');
+    }
+    if(this.topEvidence_.stage_ === 'stable') {
+      return true;
+    }
+    return false;
+  }
+  reqJoinTeam() {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::reqJoinTeam:this.topEvidence_=<',this.topEvidence_,'>');
+    }
+    if(this.isMember()) {
+      console.log('ChainOfEvidence::reqJoinTeam:this.isMember()=<',this.isMember(),'>');
+      return;
+    }
+    if(!this.graviton_ ) {
+      console.log('ChainOfEvidence::reqJoinTeam:this.graviton_=<',this.graviton_,'>');
+      return;      
+    }
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::reqJoinTeam:this.graviton_=<',this.graviton_,'>');
+    }
+    const topic = `${this.topEvidence_.address()}/guest/req/join/team`
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::reqJoinTeam:topic=<',topic,'>');
+    }
+    this.graviton_.publish(topic,this.topEvidence_);
+  }
   
   loadEvidence_() {
     const topEviStr = localStorage.getItem(constDIDAuthEvidenceTop);
@@ -130,6 +161,9 @@ export class ChainOfEvidence {
             console.log('ChainOfEvidence::loadEvidence_:doc=<',doc,'>');
           }
           self.createConnection_(this.topEvidence_);
+          if(typeof self.cb_ === 'function') {
+            self.cb_(true);
+          }
         });
       }
     } else {

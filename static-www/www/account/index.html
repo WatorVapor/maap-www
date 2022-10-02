@@ -39,7 +39,7 @@
       </div>
     </div>
     <div class="container-fluid mt-3 collapse" id="collapseJoinDid">
-      <div class="row justify-content-center" id="vue-ui-didAuth-join">
+      <div class="row justify-content-center" id="vue-ui-did-team-join">
         <div class="col-8">         
           <div class="form-group row mt-2">
             <div class="col-sm-2">
@@ -57,13 +57,13 @@
               <canvas id="qrcode-preview"></canvas>
             </div>
             <div class="col-sm-2">
-              <img v-bind:src="didAuth.secretQR" class="rounded float-start" onload="onUIQRCodeLoaded(this)">
+              <img v-bind:src="didteam.secretQR" class="rounded float-start" onload="onUIQRCodeLoaded(this)">
             </div>
           </div>
           <div class="form-group row mt-3">
             <label class="col-sm-2 col-form-label vue-lang">{% account.didText %}</label>
             <div class="col-sm-5">
-              <input type='text' class="form-control fs-6" rows="1" v-model="didAuth.toJoinDid" onchange="onUIChangeTextDid(this)">{{ didAuth.toJoinDid }}</input>
+              <input type='text' class="form-control fs-6" rows="1" v-model="didteam.toJoinDid" onchange="onUIChangeTextDid(this)">{{ didteam.toJoinDid }}</input>
             </div>
             <div class="col-sm-3">
               <button class="btn btn-success" id="evt-btn-join-did" disabled onclick="onUIClickJoinDid(this)">
@@ -78,12 +78,12 @@
     <hr/>
     
     <div class="container-fluid">
-      <div class="row justify-content-center" id="vue-ui-didAuth-token">
+      <div class="row justify-content-center" id="vue-ui-did-team-token">
         <div class="col-8">
           <div class="form-group row">
             <label class="col-sm-2 col-form-label vue-lang">{% account.namelabel %}</label>
             <div class="col-sm-8">
-              <input type="text" class="form-control" v-bind:value="didAuth.name">
+              <input type="text" class="form-control" v-bind:value="didteam.name">
             </div>
             <div class="col-sm-2">
               <button class="btn btn-success" onclick="onUIClickApplyGravitionTokenName(this)">
@@ -105,24 +105,33 @@
       </div>
     </div>
     <div class="container-fluid mt-3 collapse show" id="collapseDidDocument">
-      <div class="row justify-content-center" id="vue-ui-didAuth-details">
+      <div class="row justify-content-center" id="vue-ui-did-team-details">
         <div class="col-8">         
           <div class="form-group row">
             <label class="col-sm-2 col-form-label vue-lang">{% account.didMineCode %}</label>
-            <div class="col-sm-10">
-              <input type="text" readonly class="form-control-plaintext" v-bind:value="didAuth.didText">
+            <div class="col-sm-6">
+              <input type="text" readonly class="form-control-plaintext" v-bind:value="didteam.didText">
+            </div>
+            <div class="col-sm-2">
+              <span class="badge text-bg-secondary vue-lang" v-if="didteam.isMember === false">{% account.didTeamGuest %}</span>
+              <span class="badge text-bg-success vue-lang" v-if="didteam.isMember">{% account.didTeamMember %}</span>
+            </div>
+            <div class="col-sm-2">
+              <button class="btn btn-sm btn-success" @click="onUIClickReqJoinTeam(this)">
+                <span class="vue-lang">{% account.didTeamJoinRequest %}</span>
+              </button>
             </div>
           </div>
           <div class="form-group row mt-2">
             <label class="col-sm-2 col-form-label vue-lang">{% account.didMineQR %}</label>
             <div class="col-sm-10">
-              <img v-bind:src="didAuth.didQR" class="rounded float-start">
+              <img v-bind:src="didteam.didQR" class="rounded float-start">
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-2 col-form-label vue-lang">{% account.didDocumentDetails %}</label>
             <div class="col-sm-10">
-              <pre>{{ didAuth.didDocumentJson }}</pre>
+              <pre>{{ didteam.didDocumentJson }}</pre>
             </div>
           </div>
          </div>

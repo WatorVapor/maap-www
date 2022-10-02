@@ -1,7 +1,7 @@
 import * as Vue from 'https://cdn.jsdelivr.net/npm/vue@3.2.39/dist/vue.esm-browser.prod.js';
 import { DIDTeamAuth } from '/maap/assets/js/did-team-auth.js';
 //console.log('::DIDTeamAuth=<',DIDTeamAuth,'>');
-document.addEventListener('DOMContentLoaded', async (evt) => {
+document.addEventListener('DOMContentLoaded', (evt) => {
   console.log('DOMContentLoaded::evt=<',evt,'>');
   createAccountApp_();
 });
@@ -9,46 +9,70 @@ document.addEventListener('DOMContentLoaded', async (evt) => {
 const gApp = {};
 let gDidTeam = false;
 
-const createAccountApp_ = async ()=> {
-  gDidTeam = new DIDTeamAuth();
+
+const createAccountApp_ = ()=> {
+  gDidTeam = new DIDTeamAuth( async (ready)=> {
+    console.log('createAccountApp_::ready=<',ready,'>');
+    gApp.token.didteam.didText = gDidTeam.address();
+    gApp.token.name = gDidTeam.name();
+    
+    gApp.details.didteam.didText = gDidTeam.address();
+    const qrcode = await new QRCode.toDataURL(gDidTeam.address());  
+    gApp.details.didteam.didQR = qrcode;
+    gApp.details.didteam.didDocumentJson = JSON.stringify(gDidTeam.document(),undefined,2);
+    gApp.details.didteam.isMember = gDidTeam.isMember();
+  });
+  const joinData = {
+    didteam:{
+      didText:'',
+      didQR:'',
+      didDocument:{},
+    }    
+  }
   const appJoin = Vue.createApp({
     data() {
-      return {
-        didAuth:{
-          didText:'',
-          didQR:'',
-          didDocument:{},
-        }
-      };
+      return joinData;
     }
   });
-  gApp.join = appJoin.mount('#vue-ui-didAuth-join');
+  gApp.join = appJoin.mount('#vue-ui-did-team-join');
+  
+  const appData = {
+    didteam:{
+      didText:'',
+    },
+    name:'',    
+  };
+
   const appToken = Vue.createApp({
     data() {
-      return {
-        didAuth:{
-          didText:gDidTeam.address(),
-          name:gDidTeam.name()
-        }
-      };
+      return appData;
     }
   });
-  gApp.token = appToken.mount('#vue-ui-didAuth-token');
+  gApp.token = appToken.mount('#vue-ui-did-team-token');
   
-  const qrcode = await new QRCode.toDataURL(gDidTeam.address());
+
+  const detailsData = {
+    didteam:{
+      didText:'',
+      didQR:'',
+      didDocumentJson:'',
+      isMember:false
+    }
+  };
   const appDetails = Vue.createApp({
     data() {
-      return {
-        didAuth:{
-          didText:gDidTeam.address(),
-          didQR:qrcode,
-          didDocumentJson:JSON.stringify(gDidTeam.document(),undefined,2),          
-        }
-      };
+      return detailsData;
+    },
+    methods:{
+      onUIClickReqJoinTeam( elem ){
+        console.log('onUIClickReqJoinTeam::elem=<',elem,'>');
+        console.log('onUIClickReqJoinTeam::this.didteam=<',this.didteam,'>');
+        gDidTeam.reqJoinTeam();
+      }
     }
   });
   console.log('createAccountApp_::appDetails=<',appDetails,'>');
-  gApp.details = appDetails.mount('#vue-ui-didAuth-details');   
+  gApp.details = appDetails.mount('#vue-ui-did-team-details');   
   console.log('createAccountApp_::gApp=<',gApp,'>');
 }
 
@@ -135,16 +159,6 @@ window.onUIQRCodeLoaded = (img) => {
   }
 }
 
-/*
-window.onUIClickVerifyGravitionSecret = (elem) => {
-  console.log('onUIClickVerifyGravitionSecret::elem=<',elem,'>');
-  const secretKey = gVMKeyImport.edAuth.secret;
-  console.log('onUIClickVerifyGravitionSecret::secretKey=<',secretKey,'>');
-  if(edAuth && secretKey) {
-    edAuth.verifySecretKey(secretKey.trim());
-  }
-}
-*/
 
 const constConfCamera = {
   video:{

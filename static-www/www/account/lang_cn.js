@@ -14,6 +14,10 @@ export const data = {
     didDocumentDetails:'DID文档详细',
 
     aboutDidTeam:'DID小队认证技术详细介绍',
+
+    didTeamGuest:'受邀客人',
+    didTeamMember:'小队成员',
+    didTeamJoinRequest:'入队申请',
     
     keyImport:'导入已存账户',
     importApply:'导入',

@@ -24,6 +24,16 @@ export class Graviton {
       }
     });
   }
+  publish(topic,msg) {
+    if(Graviton.debug) {
+      console.log('Graviton::publish:topic=<',topic,'>');
+    }
+    const msgSigned = this.mass_.sign(msg);
+    if(Graviton.debug) {
+      console.log('Graviton::publish:msgSigned=<',msgSigned,'>');
+    }
+    this.mqttClient_.publish(topic,JSON.stringify(msgSigned));
+  }
   
   searchMassOfMine_(cb) {
     if(Graviton.trace) {
@@ -258,6 +268,8 @@ export class Graviton {
       console.error('Graviton::onMqttMessage_ msgStr:=<', msgStr, '>');
     }
   }
+  
+  
   onGravitonJoined_(nodeMsg) {
     if(Graviton.debug) {
       console.log('Graviton::onGravitonJoined_ nodeMsg:=<', nodeMsg, '>');

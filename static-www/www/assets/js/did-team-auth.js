@@ -2,9 +2,10 @@ import { Evidence,ChainOfEvidence } from './did/evidence.js';
 export class DIDTeamAuth {
   static debug = false;
   static name_ = null;
-  constructor() {
+  constructor(cb) {
     DIDTeamAuth.name_ = localStorage.getItem(constDIDAuthName);
-    this.cov_ = new ChainOfEvidence();
+    this.cb_ = cb;
+    this.cov_ = new ChainOfEvidence(cb);
   }
   pub() {
   }
@@ -26,5 +27,11 @@ export class DIDTeamAuth {
   }
   joinDid(id,cb) {
     this.cov_.joinDid(id,cb);
+  }
+  isMember() {
+    return this.cov_.isMember();
+  }
+  reqJoinTeam() {
+    return this.cov_.reqJoinTeam();
   }
 }
