@@ -43,4 +43,10 @@ export class DIDTeamAuth {
   reqJoinTeam(passcode) {
     return this.cov_.reqJoinTeam(passcode);
   }
+  allowJoinTeam(reqMsg) {
+    return this.cov_.allowJoinTeam(reqMsg);
+  }
+  denyJoinTeam(reqMsg) {
+    return this.cov_.denyJoinTeam(reqMsg);
+  }
 }

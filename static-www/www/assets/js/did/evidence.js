@@ -146,6 +146,16 @@ export class ChainOfEvidence {
     };
     this.graviton_.publish(topic,msg);
   }
+  allowJoinTeam(reqMsg) {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::allowJoinTeam:reqMsg=<',reqMsg,'>');
+    }
+  }
+  denyJoinTeam(reqMsg) {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::denyJoinTeam:reqMsg=<',reqMsg,'>');
+    }
+  }
   
   loadEvidence_() {
     const topEviStr = localStorage.getItem(constDIDAuthEvidenceTop);
