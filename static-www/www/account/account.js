@@ -56,8 +56,10 @@ const createAccountApp_ = ()=> {
       didText:'',
       didQR:'',
       didDocumentJson:'',
-      isMember:false
-    }
+      isMember:false,
+    },
+    passcode:'',
+    isAllowToJoin:false,
   };
   const appDetails = Vue.createApp({
     data() {
@@ -67,13 +69,53 @@ const createAccountApp_ = ()=> {
       onUIClickReqJoinTeam( elem ){
         console.log('onUIClickReqJoinTeam::elem=<',elem,'>');
         console.log('onUIClickReqJoinTeam::this.didteam=<',this.didteam,'>');
-        gDidTeam.reqJoinTeam();
+        this.passcode = getRandomInt(1000,9999);
+        gDidTeam.reqJoinTeam(this.passcode);
       }
     }
   });
   console.log('createAccountApp_::appDetails=<',appDetails,'>');
   gApp.details = appDetails.mount('#vue-ui-did-team-details');   
+
+
+  const joinRecvData = {
+    keyid:'',
+    passcode:'',
+    recvReq:{}
+  };
+  const appJoinRecv = Vue.createApp({
+    data() {
+      return joinRecvData;
+    },
+    methods:{
+      onUIClickAllowJoinTeam( elem ){
+        console.log('onUIClickAllowJoinTeam::elem=<',elem,'>');
+        console.log('onUIClickAllowJoinTeam::this.didteam=<',this.didteam,'>');
+        gDidTeam.allowJoinTeam(this.recvReq);
+      },
+      onUIClickDenyJoinTeam( elem ){
+        console.log('onUIClickDenyJoinTeam::elem=<',elem,'>');
+        console.log('onUIClickDenyJoinTeam::this.didteam=<',this.didteam,'>');
+        gDidTeam.denyJoinTeam(this.recvReq);
+      }
+    }
+  });
+  console.log('createAccountApp_::appJoinRecv=<',appJoinRecv,'>');
+  gApp.joinRecv = appJoinRecv.mount('#vue-ui-did-team-recv-join');   
+
   console.log('createAccountApp_::gApp=<',gApp,'>');
+
+  gDidTeam.onJoinReq = (jMsg) => {
+    console.log('createAccountApp_::jMsg=<',jMsg,'>');
+    const myModal = new bootstrap.Modal(document.getElementById('vue-ui-did-team-recv-join'), {
+      keyboard: false
+    })
+    gApp.joinRecv.passcode = jMsg.passcode;
+    gApp.joinRecv.keyid = jMsg.from;
+    gApp.joinRecv.recvReq = jMsg;
+    myModal.show();
+  }
+
 }
 
 
@@ -259,4 +301,11 @@ window.onUIClickJoinDid = async (elem) => {
     console.log('onUIClickJoinDid::didText=<',didText,'>');
     gDidTeam.joinDid(didText);
   }
+}
+
+
+const getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); 
 }

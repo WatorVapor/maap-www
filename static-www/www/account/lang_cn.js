@@ -18,6 +18,12 @@ export const data = {
     didTeamGuest:'受邀客人',
     didTeamMember:'小队成员',
     didTeamJoinRequest:'入队申请',
+
+    didRecvJoinReq:'接收到新的入队申请',
+    didRecvJoinReqKeyAddress:'申请者公钥地址',
+    didRecvJoinReqVerifyCode:'申请者验证码',
+    didRecvJoinReqAllow:'同意',
+    didRecvJoinReqDeny:'拒绝',
     
     keyImport:'导入已存账户',
     importApply:'导入',

@@ -1,11 +1,20 @@
 import { Evidence,ChainOfEvidence } from './did/evidence.js';
 export class DIDTeamAuth {
-  static debug = false;
+  static trace = false;
+  static debug = true;
   static name_ = null;
   constructor(cb) {
     DIDTeamAuth.name_ = localStorage.getItem(constDIDAuthName);
     this.cb_ = cb;
     this.cov_ = new ChainOfEvidence(cb);
+    this.cov_.onJoinReq  = (jMsg) => {
+      if(DIDTeamAuth.debug) {
+        console.log('DIDTeamAuth::onJoinReq:jMsg=<',jMsg,'>');
+      }
+      if(typeof this.onJoinReq === 'function') {
+        this.onJoinReq(jMsg);
+      }
+    }
   }
   pub() {
   }
@@ -31,7 +40,7 @@ export class DIDTeamAuth {
   isMember() {
     return this.cov_.isMember();
   }
-  reqJoinTeam() {
-    return this.cov_.reqJoinTeam();
+  reqJoinTeam(passcode) {
+    return this.cov_.reqJoinTeam(passcode);
   }
 }

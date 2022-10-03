@@ -255,41 +255,15 @@ export class Graviton {
       if(Graviton.debug) {
         console.log('Graviton::onMqttMessage_ goodAuthed:=<', goodAuthed, '>');
       }
-      /*
-      if(goodAuthed && typeof this.cb_ === 'function') {
-        if(channel.endsWith('/graviton/joined')) {
-          this.onGravitonJoined_(msgJson);
-        }
-        this.cb_(channel, msgJson);
+      if(goodAuthed && typeof this.onMQTTMsg === 'function') {
+        this.onMQTTMsg(channel, msgJson);
       }
-      */
     } catch(err) {
       console.error('Graviton::onMqttMessage_ err:=<', err, '>');
       console.error('Graviton::onMqttMessage_ msgStr:=<', msgStr, '>');
     }
   }
-  
-  
-  onGravitonJoined_(nodeMsg) {
-    if(Graviton.debug) {
-      console.log('Graviton::onGravitonJoined_ nodeMsg:=<', nodeMsg, '>');
-    }
-    const topic = 'joined';
-    const fullTopic = `${this.username_}/graviton/${topic}`;
-    if(nodeMsg.offer) {
-      const echoWorld = {
-        topic: fullTopic,
-        clientid:this.clientid_,
-        username:this.username_,
-        address:this.mass_.address_,
-        answer:true,
-      }
-      if(Graviton.debug) {
-        console.log('Graviton::onGravitonJoined_::echoWorld=<',echoWorld,'>');
-      }
-      this.publish_(fullTopic,echoWorld);      
-    }
-  }
+    
   publish_(fullTopic,msg) {
     const signedMsg = this.mass_.sign(msg);
     if(Graviton.debug) {
