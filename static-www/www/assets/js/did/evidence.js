@@ -39,16 +39,19 @@ export class Evidence {
     if(Evidence.debug) {
       console.log('Evidence::createFromJson_:docJson=<',docJson,'>');
     }
+    this.parent = docJson.parent;
     this.stage_ = docJson.stage;
     this.didDoc_ = new DIDLinkedDocument(docJson.didDoc,cb);
   }
   createSeed_(cb) {
+    this.parent = null;
     this.didDoc_ = new DIDSeedDocument(cb);
   }
   joinDid(docJson,cb) {
     if(Evidence.debug) {
       console.log('Evidence::joinDid:docJson=<',docJson,'>');
     }
+    this.parent = null;
     this.didDoc_ = new DIDGuestDocument(docJson.id,cb);
   }
 
