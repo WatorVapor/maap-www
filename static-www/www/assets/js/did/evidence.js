@@ -6,10 +6,12 @@ export class Evidence {
   static debug = true;
   static did_method = 'maap';
   static did_resolve = 'wss://wator.xyz:8084/jwt/did';
-  constructor(docJson,cb) {
-    this.good = false;
+  constructor(docJson,cb,srcEvidence) {
     if(Evidence.debug) {
       console.log('Evidence::constructor:docJson=<',docJson,'>');
+    }
+    if(srcEvidence) {
+      return;
     }
     if(docJson) {
       if(docJson._maap_guest) {
@@ -22,16 +24,19 @@ export class Evidence {
     }
   }
   address(){
-    if(this.didDoc_) {
-      return this.didDoc_.address();
+    if(this.didDoc) {
+      return this.didDoc.address();
     }
     return `did:${Evidence.did_method}:`;
   }
   document() {
-    if(this.didDoc_) {
-      return this.didDoc_.document();
+    if(this.didDoc) {
+      return this.didDoc.document();
     }
     return {};
+  }
+  fission() {
+    return this.createFromParent_();
   }
   
   
@@ -40,19 +45,52 @@ export class Evidence {
       console.log('Evidence::createFromJson_:docJson=<',docJson,'>');
     }
     this.parent = docJson.parent;
-    this.stage_ = docJson.stage;
-    this.didDoc_ = new DIDLinkedDocument(docJson.didDoc,cb);
+    this.stage = docJson.stage;
+    this.didDoc = new DIDLinkedDocument(docJson.didDoc,cb);
+  }
+  createFromParent_() {
+    const evidence = new Evidence(null,null,this);
+    evidence.parent = this.calcAddress_();    
+    evidence.stage = 'stable';
+    evidence.didDoc = this.didDoc;
+    return evidence;
   }
   createSeed_(cb) {
     this.parent = null;
-    this.didDoc_ = new DIDSeedDocument(cb);
+    this.stage = 'stable';
+    this.didDoc = new DIDSeedDocument(cb);
   }
   joinDid(docJson,cb) {
     if(Evidence.debug) {
       console.log('Evidence::joinDid:docJson=<',docJson,'>');
     }
     this.parent = null;
-    this.didDoc_ = new DIDGuestDocument(docJson.id,cb);
+    this.stage = 'guest';
+    this.didDoc = new DIDGuestDocument(docJson.id,cb);
+  }
+
+  calcAddress_() {
+    const msgStr = JSON.stringify(this);
+    if(Evidence.debug) {
+      console.log('Evidence::calcAddress_:msgStr=<',msgStr,'>');
+    }
+    const msgBin = nacl.util.decodeBase64(msgStr);
+    const sha512 = nacl.hash(msgBin);
+    const sha512B64 = nacl.util.encodeBase64(sha512);
+    const sha1B64 = CryptoJS.SHA1(sha512B64).toString(CryptoJS.enc.Base64);
+    if(Evidence.trace) {
+      console.log('Evidence::calcAddress_:sha1B64=<',sha1B64,'>');
+    }
+    const sha1Buffer = nacl.util.decodeBase64(sha1B64);
+    if(Evidence.trace) {
+      console.log('Evidence::calcAddress_:sha1Buffer=<',sha1Buffer,'>');
+    }
+    const encoder = new base32.Encoder({ type: "rfc4648", lc: true });
+    const address = encoder.write(sha1Buffer).finalize();
+    if(Evidence.trace) {
+      console.log('Evidence::calcAddress_:address=<',address,'>');
+    }
+    return address;
   }
 
 }
@@ -89,12 +127,7 @@ export class ChainOfEvidence {
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::createSeed:doc=<',doc,'>');
       }
-      const saveEvidence = {
-        stage:'stable',
-        didDoc:doc,
-        parent:false,
-      };
-      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(saveEvidence));
+      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(this.topEvidence_));
       if(typeof cb === 'function') {
         cb();
       }
@@ -107,12 +140,7 @@ export class ChainOfEvidence {
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::joinDid:doc=<',doc,'>');
       }
-      const saveEvidence = {
-        stage:'guest',
-        didDoc:doc,
-        parent:false,
-      };
-      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(saveEvidence));
+      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(this.topEvidence_));
     });
   }
   isMember() {
@@ -152,6 +180,10 @@ export class ChainOfEvidence {
   allowJoinTeam(reqMsg) {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:reqMsg=<',reqMsg,'>');
+    }
+    const newTop = this.topEvidence_.fission();
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::allowJoinTeam:newTop=<',newTop,'>');
     }
   }
   denyJoinTeam(reqMsg) {

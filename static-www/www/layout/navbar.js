@@ -16,15 +16,15 @@ const createTopNavBar_ = async ()=> {
     console.log('w-navbar::createTopNavBar_::vm=<',vm,'>');
   }
   
-  const { EDAuth } = await import(`${constAppPrefix}/assets/js/edauth.js`);
+  const { DIDTeamAuth } = await import(`${constAppPrefix}/assets/js/did-team-auth.js`);
   if(NAVBAR.debug) {
-    console.log('w-navbar::createTopNavBar_::EDAuth=<',EDAuth,'>');
+    console.log('w-navbar::createTopNavBar_::DIDTeamAuth=<',DIDTeamAuth,'>');
   }
   window.vueVm = window.vueVm || {};
   window.vueVm.navbar = vm;
 
-  const edAuth = new EDAuth();
-  vm.accout.name = edAuth.name();
+  const didiTeam = new DIDTeamAuth();
+  vm.accout.name = didiTeam.name();
   const evt = document.createEvent('Event');
   evt.initEvent('TopMenuBarLoaded', true, true);
   document.dispatchEvent(evt);
