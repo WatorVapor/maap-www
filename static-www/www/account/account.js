@@ -127,15 +127,38 @@ window.onUIClickCreateDidTeam = (elem) => {
     spinElem.setAttribute('class','spinner-border text-success ');
     gDidTeam.createDid( async()=>{
       spinElem.setAttribute('class','spinner-border text-success d-none');
-      gApp.token.didAuth.didText = gDidTeam.address();
+      gApp.token.didteam.didText = gDidTeam.address();
       const qrcode = await new QRCode.toDataURL(gDidTeam.address());
-      gApp.token.didAuth.didQR = qrcode;
-      gApp.token.didAuth.didDocumentJson = JSON.stringify(gDidTeam.document(),undefined,2);      
+      gApp.token.didteam.didQR = qrcode;
+      gApp.token.didteam.didDocumentJson = JSON.stringify(gDidTeam.document(),undefined,2);      
     });
   } catch(err) {
     console.error('onUIClickCreateDidTeam::err=<',err,'>');
   }
 }
+window.onUIClickJoinDid = async (elem) => {
+  const spinElem = elem.parentElement.getElementsByTagName('div')[0];
+  console.log('onUIClickCreateDidTeam::spinElem=<',spinElem,'>');
+  spinElem.setAttribute('class','spinner-border text-success ');
+
+  console.log('onUIClickJoinDid::elem=<',elem,'>');
+  const didInput = elem.parentElement.parentElement.getElementsByTagName('input')[0];
+  console.log('onUIClickJoinDid::didInput=<',didInput,'>');
+  if(didInput && gDidTeam) {
+    console.log('onUIClickJoinDid::didInput=<',didInput,'>');
+    const didText = didInput.value.trim();
+    console.log('onUIClickJoinDid::didText=<',didText,'>');
+    gDidTeam.joinDid(didText,async ()=>{
+      spinElem.setAttribute('class','spinner-border text-success d-none');
+      gApp.token.didteam.didText = gDidTeam.address();
+      const qrcode = await new QRCode.toDataURL(gDidTeam.address());
+      gApp.token.didteam.didQR = qrcode;
+      gApp.token.didteam.didDocumentJson = JSON.stringify(gDidTeam.document(),undefined,2);            
+    });
+  }
+}
+
+
 
 window.onUIClickApplyGravitionTokenName = (elem) => {
   //console.log('onUIClickApplyGravitionTokenName::elem=<',elem,'>');
@@ -291,17 +314,7 @@ const enableJoinDid = (elem)=> {
 }
 
 
-window.onUIClickJoinDid = async (elem) => {
-  console.log('onUIClickJoinDid::elem=<',elem,'>');
-  const didInput = elem.parentElement.parentElement.getElementsByTagName('input')[0];
-  console.log('onUIClickJoinDid::didInput=<',didInput,'>');
-  if(didInput && gDidTeam) {
-    console.log('onUIClickJoinDid::didInput=<',didInput,'>');
-    const didText = didInput.value.trim();
-    console.log('onUIClickJoinDid::didText=<',didText,'>');
-    gDidTeam.joinDid(didText);
-  }
-}
+
 
 
 const getRandomInt = (min, max) => {

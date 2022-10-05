@@ -67,8 +67,12 @@
             </div>
             <div class="col-sm-3">
               <button class="btn btn-success" id="evt-btn-join-did" disabled onclick="onUIClickJoinDid(this)">
-                <span class="vue-lang">{% account.join %}</span><i class="material-icons "style="color:green;">done</i>
+                <span class="vue-lang">{% account.join %}</span>
               </button>
+              <div class="spinner-border text-success d-none" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+
             </div>
           </div>
 

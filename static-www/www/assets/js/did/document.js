@@ -13,8 +13,17 @@ export class DIDDocument {
 export class DIDSeedDocument {
   static debug = true;
   constructor(cb) {
-    this.massAuth_ = new MassStore(null,cb);
-    this.massRecovery_ = new MassStore(null,cb);
+    this.ready1_ = false;
+    this.ready2_ = false;
+    const self = this;
+    this.massAuth_ = new MassStore(null,()=>{
+      self.ready1_ = true;
+      self.tryCallReady_(cb);
+    });
+    this.massRecovery_ = new MassStore(null,() => {
+      self.ready2_ = true;
+      self.tryCallReady_(cb);
+    });
   }
   address() {
     return `did:${DIDDocument.did_method}:${this.massAuth_.address()}`;
@@ -30,13 +39,11 @@ export class DIDSeedDocument {
         {
           id:`${didCode}#${this.massAuth_.address()}`,
           type: 'ed25519',
-          controller: `${this.massAuth_.address()}`,
           publicKeyBase64: this.massAuth_.pub(),
         },
         {
           id:`${didCode}#${this.massRecovery_.address()}`,
           type: 'ed25519',
-          controller: `${this.massRecovery_.address()}`,
           publicKeyBase64: this.massRecovery_.pub(),
         },
       ],
@@ -75,6 +82,12 @@ export class DIDSeedDocument {
     this.didDoc_ = didDoc;
     return didDoc;
   }
+  tryCallReady_(cb) {
+    if(this.ready1_ && this.ready2_) {
+      this.document();
+      cb();
+    }
+  }
 }
 
 export class DIDLinkedDocument {
@@ -108,7 +121,11 @@ export class DIDGuestDocument {
   static debug = true;
   constructor(address,cb) {
     this.address_ = address;
-    this.massAuth_ = new MassStore(null,cb);
+    const self = this;
+    this.massAuth_ = new MassStore(null,() => {
+      self.document();
+      cb();
+    });
   }
   address() {
     return this.address_;
@@ -123,7 +140,6 @@ export class DIDGuestDocument {
         {
           id:`${this.address()}#${this.massAuth_.address()}`,
           type: 'ed25519',
-          controller: `${this.massAuth_.address()}`,
           publicKeyBase64: this.massAuth_.pub(),
         }
       ],
