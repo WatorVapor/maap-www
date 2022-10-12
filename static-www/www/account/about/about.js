@@ -4,11 +4,24 @@ document.addEventListener('DOMContentLoaded', async (evt) => {
 });
 
 const createD3Graphviz_ = () => {
-  d3.select('#did-arch')
-  .graphviz()
+  const didArch =  d3.select('#did-arch');
+  const archElem = didArch._groups[0][0];
+  console.log('createD3Graphviz_::archElem=<',archElem,'>');
+  didArch.graphviz()
+  .zoom(false)
+  .width(archElem.clientWidth)
+  .height(archElem.clientHeight)
+  .fit(true)
   .renderDot(gDidArchDOTString);
-  d3.select('#did-document')
-  .graphviz()
+  
+  const didDoc = d3.select('#did-document')
+  const docElem = didDoc._groups[0][0];
+  console.log('createD3Graphviz_::docElem=<',docElem,'>');
+  didDoc.graphviz()
+  .zoom(false)
+  .width(docElem.clientWidth)
+  .height(docElem.clientHeight)
+  .fit(true)
   .renderDot(gDidDocumentDOTString);
 }
 
