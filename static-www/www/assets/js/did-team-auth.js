@@ -4,7 +4,6 @@ export class DIDTeamAuth {
   static debug = true;
   static name_ = null;
   constructor(cb) {
-    DIDTeamAuth.name_ = localStorage.getItem(constDIDAuthName);
     this.cb_ = cb;
     this.cov_ = new ChainOfEvidence(cb);
     this.cov_.onJoinReq  = (jMsg) => {
@@ -21,13 +20,14 @@ export class DIDTeamAuth {
   address() {
     return this.cov_.address();
   }
-  name() {
+  static name() {
+    DIDTeamAuth.name_ = localStorage.getItem(constDIDAuthName);
     return DIDTeamAuth.name_;
   }
   document() {
     return this.cov_.document();
   }
-  storeName(name) {
+  static storeName(name) {
     DIDTeamAuth.name_ = name;
     localStorage.setItem(constDIDAuthName,name);
   }

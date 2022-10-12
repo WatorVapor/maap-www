@@ -23,8 +23,7 @@ const createTopNavBar_ = async ()=> {
   window.vueVm = window.vueVm || {};
   window.vueVm.navbar = vm;
 
-  const didiTeam = new DIDTeamAuth();
-  vm.accout.name = didiTeam.name();
+  vm.accout.name = DIDTeamAuth.name();
   const evt = document.createEvent('Event');
   evt.initEvent('TopMenuBarLoaded', true, true);
   document.dispatchEvent(evt);

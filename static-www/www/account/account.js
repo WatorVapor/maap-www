@@ -14,7 +14,7 @@ const createAccountApp_ = ()=> {
   gDidTeam = new DIDTeamAuth( async (ready)=> {
     console.log('createAccountApp_::ready=<',ready,'>');
     gApp.token.didteam.didText = gDidTeam.address();
-    gApp.token.name = gDidTeam.name();
+    gApp.token.name = DIDTeamAuth.name();
     
     gApp.details.didteam.didText = gDidTeam.address();
     const qrcode = await new QRCode.toDataURL(gDidTeam.address());  

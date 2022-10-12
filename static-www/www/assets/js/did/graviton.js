@@ -1,6 +1,5 @@
 import {MassStore} from './mass-store.js';
-//import * as mqtt from 'https://cdn.jsdelivr.net/npm/mqtt@4.3.7/dist/mqtt.min.js';
-
+import {GravitonJWT} from './graviton-jwt.js';
 const iConstOneHourInMs  = 1000 * 3600;
 export class Graviton {
   static trace = false;
@@ -10,8 +9,8 @@ export class Graviton {
       console.log('Graviton::constructor:evidences=<',evidences,'>');
     }
     this.evidences_ = evidences;
-    this.cb_ = cb;
     this.mqttJwt_ = resolve;
+    this.cb_ = cb;
     this.mass_ = false;
     const self = this;
     this.searchMassOfMine_((mass)=>{
@@ -20,7 +19,7 @@ export class Graviton {
       }
       if(self.mass_ === false) {
         self.mass_ = mass;
-        self.checkLocalMqttJwt_();
+        self.checkLocalStorageOfMqttJwt_();
       }
     });
   }
@@ -73,38 +72,38 @@ export class Graviton {
     }
   }
   
-  checkLocalMqttJwt_() {
+  checkLocalStorageOfMqttJwt_() {
     if(Graviton.debug) {
-      console.log('Graviton::checkLocalMqttJwt_:this.mass_=<',this.mass_,'>');
+      console.log('Graviton::checkLocalStorageOfMqttJwt_:this.mass_=<',this.mass_,'>');
     }
     const jwtLSKey = `${constDIDTeamAuthGravitonJwtPrefix}/${this.mass_.address_}`;
     if(Graviton.debug) {
-      console.log('Graviton::checkLocalMqttJwt_:jwtLSKey=<',jwtLSKey,'>');
+      console.log('Graviton::checkLocalStorageOfMqttJwt_:jwtLSKey=<',jwtLSKey,'>');
     }
     const jwtStr = localStorage.getItem(jwtLSKey);
     if(jwtStr) {
       try {
         const jwt = JSON.parse(jwtStr);
         if(Graviton.debug) {
-          console.log('Graviton::checkLocalMqttJwt_:jwt=<',jwt,'>');
+          console.log('Graviton::checkLocalStorageOfMqttJwt_:jwt=<',jwt,'>');
         }
         if(jwt.payload && jwt.payload.exp ) {
           const jwtExpDate = new Date();
           const timeInMs = parseInt(jwt.payload.exp) *1000;
           jwtExpDate.setTime(timeInMs);
           if(Graviton.debug) {
-            console.log('Graviton::checkLocalMqttJwt_:jwtExpDate=<',jwtExpDate,'>');
+            console.log('Graviton::checkLocalStorageOfMqttJwt_:jwtExpDate=<',jwtExpDate,'>');
           }
           const exp_remain_ms = jwtExpDate - new Date();
           if(Graviton.debug) {
-            console.log('Graviton::checkLocalMqttJwt_:exp_remain_ms=<',exp_remain_ms,'>');
+            console.log('Graviton::checkLocalStorageOfMqttJwt_:exp_remain_ms=<',exp_remain_ms,'>');
           }
           if(exp_remain_ms > iConstOneHourInMs) {
             return this.createMqttConnection_(jwt.jwt,jwt.payload);
           }
         }
       } catch(err) {
-        console.error('Graviton::checkLocalMqttJwt_:err=<',err,'>');
+        console.error('Graviton::checkLocalStorageOfMqttJwt_:err=<',err,'>');
       }
     }
     this.reqMqttAuthOfJwt_();
@@ -113,80 +112,10 @@ export class Graviton {
     if(Graviton.trace) {  
       console.log('Graviton::reqMqttAuthOfJwt_:this.evidences_=<',this.evidences_,'>');
     }
-    this.createMqttAuthOfJwtConnection_();
-  }
-  createMqttAuthOfJwtConnection_() {
-    if(Graviton.trace) {
-      console.log('Graviton::createMqttAuthOfJwtConnection_:this.mqttJwt_=<',this.mqttJwt_,'>');
-    }    
-    const wsClient = new WebSocket(this.mqttJwt_);
-    if(Graviton.debug) {
-      console.log('Graviton::wsClient=<',wsClient,'>');
-    }
     const self = this;
-    wsClient.onopen = (evt)=> {
-      if(Graviton.debug) {
-        console.log('Graviton::createMqttAuthOfJwtConnection_::onopen:evt=<',evt,'>');
-      }
-      setTimeout(()=>{
-        self.onMqttJwtChannelOpened_(wsClient);
-      },100)
-    }
-    wsClient.onclose = (evt)=> {
-      if(Graviton.debug) {
-        console.log('Graviton::createMqttAuthOfJwtConnection_::onclose:evt=<',evt,'>');
-      }
-    }
-    wsClient.onerror = (err)=> {
-      console.error('Graviton::createMqttAuthOfJwtConnection_::onerror:err=<',err,'>');
-    }
-    wsClient.onmessage = (evt)=> {
-      if(Graviton.debug) {
-        console.log('Graviton::createMqttAuthOfJwtConnection_::onmessage:evt=<',evt,'>');
-      }
-      try {
-        const msg = JSON.parse(evt.data);
-        if(Graviton.debug) {
-          console.log('Graviton::createMqttAuthOfJwtConnection_::onmessage:msg=<',msg,'>');
-        }
-        if(msg.jwt && msg.payload) {
-          self.onMqttJwtReply_(msg.jwt,msg.payload,evt.data);
-        }
-      } catch(err) {
-        console.error('Graviton::createMqttAuthOfJwtConnection_::onmessage:err=<',err,'>');
-      }
-    }
-
-  }
-  onMqttJwtChannelOpened_ (wsClient) {
-    if(Graviton.debug) {
-      console.log('onMqttJwtChannelOpened_::wsClient=<',wsClient,'>');
-      console.log('onMqttJwtChannelOpened_::this.evidences_=<',this.evidences_,'>');
-      console.log('Graviton::reqMqttAuthOfJwt_:this.mass_=<',this.mass_,'>');
-    }
-    const jwtReq = {
-      jwt:{
-        browser:true,
-        address:this.mass_.address_,
-      },
-      evidences:this.evidences_
-    }
-    const signedJwtReq = this.mass_.sign(jwtReq);
-    if(Graviton.debug) {
-      console.log('onMqttJwtChannelOpened_::signedJwtReq=<',signedJwtReq,'>');
-    }
-    wsClient.send(JSON.stringify(signedJwtReq));
-  }
-  onMqttJwtReply_(jwt,payload,origData) {
-    if(Graviton.debug) {
-      console.log('onMqttJwtReply_::jwt=<',jwt,'>');
-      console.log('onMqttJwtReply_::payload=<',payload,'>');
-    }
-    if(payload.keyid) {
-      const jwtLSKey = `${constDIDTeamAuthGravitonJwtPrefix}/${payload.keyid}`;
-      localStorage.setItem(jwtLSKey,origData);
-    }
-    this.createMqttConnection_(jwt,payload);
+    const jwtReq = new GravitonJWT(this.evidences_,this.mqttJwt_,()=>{
+      self.checkLocalStorageOfMqttJwt_();
+    });
   }
   
   createMqttConnection_(jwt,payload) {
