@@ -1,28 +1,9 @@
 export const data = {
-  account:{
-    createDid:'创建新DID',
-    joinDid:'加入已存DID',
-    didQRScan:'扫描DID二维码',
-    didLoadQRFile:'加载DID二维码文件',
-    didText:'DID标识符',
-    join:'加入',
-    didMineCode:'我的DID标识符',
-    didMineQR:'我的DID二维码',
-    didDocumentMine:'我的DID文档',
-    didDocumentDetails:'DID文档详细',
-
-    help:'关于DID账户介绍',
-    
-    keyImport:'导入已存账户',
-    importApply:'导入',
-    verify:'验证密钥正确性',
-    tokenlabel:'DID标识符:',
-    namelabel:'账户名字:',
-    modify:'变更',
-    keyExport:'导出现在账户',
-    secretKeyB64:'账户私钥字符:',
-    secretKeyQR:'账户私钥二维码:',
-    secretKeyLoadQRFile:'打开私钥二维码图片：',
-    secretKeyQRScan:'扫描私钥二维码'
+  about:{
+    head1:`
+      随着个人拥有的设备越来越多，一个人可能拥有一台乃至数台各种类型设备，比如手机，桌面电脑，便携电脑，电视盒子，
+      单板电脑（树莓派，香蕉派，香橙派），本系统实现把这些个设备组织成一个完全受创建者控制的组。
+      认证部分是基于DID规范数字签名，通信部分基于有访问控制表的MQTT通信。
+      `,
   }
 }
