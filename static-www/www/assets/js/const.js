@@ -43,3 +43,5 @@ const constDIDTeamAuthEvidenceTop = 'maap/didteam/auth/evidence/top';
 const constDIDTeamAuthMassStore = 'maap/didteam/auth/mass/store';
 const constDIDTeamAuthGravitonJwtPrefix = 'maap/didteam/auth/graviton/jwt';
 
+const constDIDTeamAuthEvidenceChainPrefix = 'maap/didteam/auth/evidence/chain';
+

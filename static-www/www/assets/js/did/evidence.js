@@ -1,6 +1,8 @@
 import {DIDSeedDocument,DIDLinkedDocument,DIDGuestDocument} from './document.js';
 import {Graviton} from './graviton.js';
 
+//import {LocalForage} from 'https://cdn.jsdelivr.net/npm/localforage@1.10.0/build/es5src/localforage.js';
+
 export class Evidence {
   static trace = false;
   static debug = true;
@@ -57,6 +59,8 @@ export class Evidence {
     evidence.coc_.parent = this.calcAddress_();    
     evidence.coc_.stage = 'stable';
     evidence.didDoc = this.didDoc;
+    const keyId = this.calcAddress_(newEvidence.auth.pub);
+    evidence.coc_.didDoc = this.didDoc.appendDocument(keyId,newEvidence.auth.pub);
     return evidence;
   }
   createSeed_(cb) {
@@ -106,6 +110,9 @@ export class ChainOfEvidence {
   constructor(cb) {
     this.topEvidence_ = false;
     this.cb_ = cb;
+    this.chainStore_ = localforage.createInstance({
+      name: 'maap_evidence_chain'
+    });    
     this.loadEvidence_();
   }
   address() {
@@ -133,7 +140,7 @@ export class ChainOfEvidence {
         console.log('ChainOfEvidence::createSeed:self.topEvidence_=<',self.topEvidence_.coc_,'>');
       }
       self.topEvidence_.coc_.didDoc = self.topEvidence_.document();
-      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
+      localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
       if(typeof cb === 'function') {
         cb();
       }
@@ -147,7 +154,7 @@ export class ChainOfEvidence {
         console.log('ChainOfEvidence::joinDid:self.topEvidence_=<',self.topEvidence_.coc_,'>');
       }
       self.topEvidence_.coc_.didDoc = self.topEvidence_.document();
-      localStorage.setItem(constDIDAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
+      localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
       if(typeof cb === 'function') {
         cb();
       }
@@ -198,6 +205,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:this.topEvidence_=<',this.topEvidence_,'>');
     }
+    this.saveEvidencesToChain_(this.topEvidence_);
   }
   denyJoinTeam(reqMsg) {
     if(ChainOfEvidence.debug) {
@@ -206,7 +214,7 @@ export class ChainOfEvidence {
   }
   
   loadEvidence_() {
-    const topEviStr = localStorage.getItem(constDIDAuthEvidenceTop);
+    const topEviStr = localStorage.getItem(constDIDTeamAuthEvidenceTop);
     if(ChainOfEvidence.trace) {
       console.log('ChainOfEvidence::loadEvidence_:topEviStr=<',topEviStr,'>');
     }
@@ -268,4 +276,23 @@ export class ChainOfEvidence {
       }      
     }
   }
+  saveEvidencesToChain_(evidence){
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::saveEvidencesToChain_:evidence=<',evidence,'>');
+    }
+    const chainAddress = evidence.calcAddress_(evidence.coc_);
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::saveEvidencesToChain_:chainAddress=<',chainAddress,'>');
+    }
+    const chainPath = `${constDIDTeamAuthEvidenceChainPrefix}/${chainAddress}`;
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::saveEvidencesToChain_:chainPath=<',chainPath,'>');
+    }
+    this.chainStore_.setItem(chainPath,JSON.stringify(evidence.coc_),(err)=>{
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::saveEvidencesToChain_:err=<',err,'>');
+      }      
+    });
+  }
 }
+

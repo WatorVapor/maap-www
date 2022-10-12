@@ -35,6 +35,7 @@ export class DIDSeedDocument {
       id:didCode,
       version:1.0,
       created:(new Date()).toISOString(),
+      updated:(new Date()).toISOString(),
       publicKey:[
         {
           id:`${didCode}#${this.massAuth_.address()}`,
@@ -82,6 +83,9 @@ export class DIDSeedDocument {
     this.didDoc_ = didDoc;
     return didDoc;
   }
+  appendDocument(keyid) {
+    return didDoc;
+  }
   tryCallReady_(cb) {
     if(this.ready1_ && this.ready2_) {
       this.document();
@@ -99,11 +103,7 @@ export class DIDLinkedDocument {
     this.cb_ = cb;
     this.address_ = evidence.id;
     this.didDoc_ = evidence;
-    setTimeout(()=> {
-      if(typeof this.cb_ === 'function') {
-        this.cb_();
-      }
-    },1);
+    this.loadAuthMass_();
   }
   address() {
     return this.address_;
@@ -113,6 +113,68 @@ export class DIDLinkedDocument {
       console.log('DIDLinkedDocument::document:this.didDoc_=<',this.didDoc_,'>');
     }
     return this.didDoc_;
+  }
+  appendDocument(keyid,keyB64) {
+    if(DIDLinkedDocument.debug) {
+      console.log('DIDLinkedDocument::appendDocument:keyid=<',keyid,'>');
+      console.log('DIDLinkedDocument::appendDocument:keyB64=<',keyB64,'>');
+      console.log('DIDLinkedDocument::appendDocument:this.didDoc_=<',this.didDoc_,'>');
+    }
+    const didCode = this.didDoc_.id;
+    const newDidDoc = Object.assign({},this.didDoc_);
+    newDidDoc.updated = (new Date()).toISOString();
+    const newPublicKey = {
+      id:`${didCode}#${keyid}`,
+      type: 'ed25519',
+      publicKeyBase64: keyB64,      
+    };
+    newDidDoc.publicKey.push(newPublicKey);
+    newDidDoc.authentication.push(`${didCode}#${keyid}`);
+    delete newDidDoc.proof;
+    const creator = `${didCode}#${this.massAuth_.address_}`;
+    const proofs = this.didDoc_.proof.filter(( proof ) => {
+      return proof.creator !== creator;
+    });
+    const signedMsg = this.massAuth_.signWithoutTS(newDidDoc);
+    const proof = {
+      type:'ed25519',
+      creator:creator,
+      signatureValue:signedMsg.auth.sign,
+    };
+    proofs.push(proof); 
+    newDidDoc.proof = proofs;
+    return newDidDoc;
+  }
+  loadAuthMass_() {
+    if(DIDLinkedDocument.debug) {
+      console.log('DIDLinkedDocument::loadAuthMass_:this.didDoc_=<',this.didDoc_,'>');
+    }
+    const self = this;
+    for(const authentication of this.didDoc_.authentication) {
+      if(DIDLinkedDocument.debug) {
+        console.log('DIDLinkedDocument::loadAuthMass_:authentication=<',authentication,'>');
+      }
+      const authParams = authentication.split('#');
+      if(authParams.length >1 ) {
+        const keyId = authParams[authParams.length-1];
+        if(DIDLinkedDocument.debug) {
+          console.log('DIDLinkedDocument::loadAuthMass_:keyId=<',keyId,'>');
+        }
+        if(keyId && !this.massAuth_) {
+          const mass = new MassStore(keyId,(good)=>{
+            if(DIDLinkedDocument.debug) {
+              console.log('DIDLinkedDocument::loadAuthMass_:good=<',good,'>');
+            }
+            if(good) {
+              self.massAuth_ = mass;
+              if(typeof self.cb_ === 'function') {
+                self.cb_();
+              }
+            }
+          });
+        }
+      }
+    }
   }
 }
 
@@ -136,6 +198,7 @@ export class DIDGuestDocument {
       id:this.address(),
       version:1.0,
       created:(new Date()).toISOString(),
+      updated:(new Date()).toISOString(),
       publicKey:[
         {
           id:`${this.address()}#${this.massAuth_.address()}`,
