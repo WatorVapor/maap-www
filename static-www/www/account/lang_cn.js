@@ -23,18 +23,6 @@ export const data = {
     didRecvJoinReqKeyAddress:'申请者公钥地址',
     didRecvJoinReqVerifyCode:'申请者验证码',
     didRecvJoinReqAllow:'同意',
-    didRecvJoinReqDeny:'拒绝',
-    
-    keyImport:'导入已存账户',
-    importApply:'导入',
-    verify:'验证密钥正确性',
-    tokenlabel:'DID标识符:',
-    namelabel:'账户名字:',
-    modify:'变更',
-    keyExport:'导出现在账户',
-    secretKeyB64:'账户私钥字符:',
-    secretKeyQR:'账户私钥二维码:',
-    secretKeyLoadQRFile:'打开私钥二维码图片：',
-    secretKeyQRScan:'扫描私钥二维码'
+    didRecvJoinReqDeny:'拒绝',    
   }
 }
