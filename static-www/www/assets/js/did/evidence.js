@@ -56,7 +56,7 @@ export class Evidence {
       console.log('Evidence::createFromParent_:newEvidence=<',newEvidence,'>');
     }
     const evidence = new Evidence(null,null,this);
-    evidence.coc_.parent = this.calcAddress_();    
+    evidence.coc_.parent = this.calcBlockAddress_();    
     evidence.coc_.stage = 'stable';
     evidence.didDoc = this.didDoc;
     const keyId = this.calcAddress_(newEvidence.auth.pub);
@@ -77,12 +77,19 @@ export class Evidence {
     this.didDoc = new DIDGuestDocument(docJson.id,cb);
   }
 
-  calcAddress_() {
+  calcBlockAddress_() {
     const msgStr = JSON.stringify(this);
     if(Evidence.debug) {
       console.log('Evidence::calcAddress_:msgStr=<',msgStr,'>');
     }
     const msgB64 = nacl.util.encodeBase64(msgStr);
+    return this.calcAddress_(msgB64);
+  }
+  calcStrAddress_(msgStr) {
+    const msgB64 = nacl.util.encodeBase64(msgStr);
+    return this.calcAddress_(msgB64);    
+  }
+  calcAddress_(msgB64) {
     const msgBin = nacl.util.decodeBase64(msgB64);
     const sha512 = nacl.hash(msgBin);
     const sha512B64 = nacl.util.encodeBase64(sha512);
@@ -226,7 +233,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::denyJoinTeam:reqMsg=<',reqMsg,'>');
     }
-    const topic = `${this.topEvidence.address()}/guest/reply/join/team`
+    const topic = `${this.topEvidence_.address()}/guest/reply/join/team`
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::denyJoinTeam:topic=<',topic,'>');
     }
@@ -311,7 +318,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::saveEvidencesToChain_:evidence=<',evidence,'>');
     }
-    const chainAddress = evidence.calcAddress_(evidence.coc_);
+    const chainAddress = evidence.calcStrAddress_(evidence.coc_);
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::saveEvidencesToChain_:chainAddress=<',chainAddress,'>');
     }

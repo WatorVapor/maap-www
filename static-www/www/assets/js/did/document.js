@@ -123,13 +123,27 @@ export class DIDLinkedDocument {
     const didCode = this.didDoc_.id;
     const newDidDoc = Object.assign({},this.didDoc_);
     newDidDoc.updated = (new Date()).toISOString();
+    const keyIdFull = `${didCode}#${keyid}`;
+
     const newPublicKey = {
-      id:`${didCode}#${keyid}`,
+      id:keyIdFull,
       type: 'ed25519',
       publicKeyBase64: keyB64,      
     };
-    newDidDoc.publicKey.push(newPublicKey);
-    newDidDoc.authentication.push(`${didCode}#${keyid}`);
+    let isNewPubKey = true;
+    for( const publicKey of newDidDoc.publicKey) {
+      if(publicKey.publicKeyBase64 === keyB64) {
+        isNewPubKey = false;
+      }
+    }
+    if(isNewPubKey) {
+      newDidDoc.publicKey.push(newPublicKey);
+    }
+    if(newDidDoc.authentication.indexOf(keyIdFull) === -1){
+      newDidDoc.authentication.push(keyIdFull);
+    }
+   
+    
     delete newDidDoc.proof;
     const creator = `${didCode}#${this.massAuth_.address_}`;
     const proofs = this.didDoc_.proof.filter(( proof ) => {
