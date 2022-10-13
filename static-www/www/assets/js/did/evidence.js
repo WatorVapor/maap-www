@@ -205,12 +205,35 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:this.topEvidence_=<',this.topEvidence_,'>');
     }
+    localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(newTop.coc_));
     this.saveEvidencesToChain_(this.topEvidence_);
+    const topic = `${newTop.address()}/guest/reply/join/team`
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::allowJoinTeam:topic=<',topic,'>');
+    }
+    const msg = {
+      evidence:newTop,
+    };
+    this.graviton_.publish(topic,msg);
+    /*
+    setTimeout(()=>{
+      location.reload();
+    },1)
+    */
+
   }
   denyJoinTeam(reqMsg) {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::denyJoinTeam:reqMsg=<',reqMsg,'>');
     }
+    const topic = `${this.topEvidence.address()}/guest/reply/join/team`
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::denyJoinTeam:topic=<',topic,'>');
+    }
+    const msg = {
+      deny:true,
+    };
+    this.graviton_.publish(topic,msg);
   }
   
   loadEvidence_() {
@@ -268,6 +291,14 @@ export class ChainOfEvidence {
       }
       if(typeof this.onJoinReq === 'function') {
         this.onJoinReq(jMsg);
+      }
+    } else if(topic.endsWith('guest/reply/join/team')){
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::onMQTTMsg_:topic=<',topic,'>');
+        console.log('ChainOfEvidence::onMQTTMsg_:this.onJoinReply=<',this.onJoinReply,'>');
+      }
+      if(typeof this.onJoinReply === 'function') {
+        this.onJoinReply(jMsg);
       }
     } else {
       if(ChainOfEvidence.debug) {

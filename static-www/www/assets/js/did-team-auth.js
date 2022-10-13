@@ -14,6 +14,14 @@ export class DIDTeamAuth {
         this.onJoinReq(jMsg);
       }
     }
+    this.cov_.onJoinReply  = (jMsg) => {
+      if(DIDTeamAuth.debug) {
+        console.log('DIDTeamAuth::onJoinReply:jMsg=<',jMsg,'>');
+      }
+      if(typeof this.onJoinReply === 'function') {
+        this.onJoinReply(jMsg);
+      }
+    }
   }
   pub() {
   }
