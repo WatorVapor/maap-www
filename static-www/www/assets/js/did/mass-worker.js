@@ -1,8 +1,8 @@
+import nacl from 'https://cdn.jsdelivr.net/npm/tweetnacl-es6@1.0.3/nacl-fast-es.min.js';
 const MassWoker = {
   trace:false,
   debug:false
 };
-import nacl from 'https://cdn.jsdelivr.net/npm/tweetnacl-es6@1.0.3/nacl-fast-es.min.js';
 if(MassWoker.trace) {
   console.log('::::nacl=<',nacl,'>');
 }

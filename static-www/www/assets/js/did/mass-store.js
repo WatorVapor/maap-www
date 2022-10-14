@@ -2,14 +2,12 @@ const iConstOneDayMs = 1000*3600*24;
 
 export class MassStore {
   static trace = false;
-  static debug = true;
+  static debug = false;
   constructor(keyAddress,readycb) {
     this.readyCB_ = readycb;
     this.massStore_ = localforage.createInstance({
       name: 'maap_mass_key'
     });    
-    console.log('MassStore::constructor::this.massStore_=<',this.massStore_,'>'); 
-    console.log('MassStore::constructor::this.massStore_.ready()=<',this.massStore_.ready(),'>'); 
     if(keyAddress) {
       this.secretKeyPath_ = `${constDIDTeamAuthMassPrefix}/${keyAddress}/secretKey`;
       this.publicKeyPath_ = `${constDIDTeamAuthMassPrefix}/${keyAddress}/publicKey`;
@@ -151,25 +149,7 @@ export class MassStore {
   async createMassStoreKey_() {
     this.mineMassStoreKey_();
   }
-  /*
-  mineMassStoreKey_() {
-    while(true) {
-      const keyPair = nacl.sign.keyPair();
-      if(MassStore.trace) {
-        console.log('MassStore::mineMassStoreKey_:keyPair=<',keyPair,'>');
-      }
-      const b64Pub = nacl.util.encodeBase64(keyPair.publicKey);
-      if(MassStore.trace) {
-        console.log('MassStore::mineMassStoreKey_:b64Pub=<',b64Pub,'>');
-      }
-      const address = this.calcAddress_(b64Pub);
-      if(address.startsWith('mp')) {
-        return keyPair;
-      }
-    }
-  }
-  */
-  
+ 
   mineMassStoreKey_() {
     const mineWorker = new Worker('/maap/assets/js/did/mass-worker.js',{ type: 'module' });
     if(MassStore.trace) {
@@ -240,29 +220,18 @@ export class MassStore {
       if(MassStore.debug) {
         console.log('MassStore::loadMassStoreKey_:this.massStore_=<',this.massStore_,'>');
       }
-      const ready = await this.massStore_.ready();
-      if(MassStore.debug) {
-        console.log('MassStore::loadMassStoreKey_:ready=<',ready,'>');
-      }
-      this.massStore_.getItem(this.addressPath_)
-      .then((addressValue)=>{
-        if(MassStore.debug) {
-          console.log('MassStore::loadMassStoreKey_:addressValue=<',addressValue,'>');
-        }
-        
-      })
-      .catch((err)=>{
-        if(MassStore.debug) {
-          console.log('MassStore::loadMassStoreKey_:err=<',err,'>');
-        }        
-      })
-      ;
-
+      await this.massStore_.ready();
       const address = await this.massStore_.getItem(this.addressPath_);
       if(MassStore.debug) {
         console.log('MassStore::loadMassStoreKey_:this.massStore_=<',this.massStore_,'>');
         console.log('MassStore::loadMassStoreKey_:this.addressPath_=<',this.addressPath_,'>');
         console.log('MassStore::loadMassStoreKey_:address=<',address,'>');
+      }
+      if(!address) {
+        if(typeof this.readyCB_ === 'function') {
+          this.readyCB_(false);
+        }
+        return;
       }
       this.address_ = address;
       const PriKey = await this.massStore_.getItem(this.secretKeyPath_);
@@ -291,6 +260,9 @@ export class MassStore {
       this.pubKey_ = nacl.util.decodeBase64(pubKey);
     } catch(err) {
       console.error('MassStore::loadMassStoreKey_:err=<',err,'>');
+      if(typeof this.readyCB_ === 'function') {
+        this.readyCB_(false);
+      }
       return false;
     }
     if(MassStore.trace) {

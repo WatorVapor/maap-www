@@ -4,24 +4,15 @@ const iConstOneHourInMs  = 1000 * 3600;
 export class Graviton {
   static trace = false;
   static debug = true;
-  constructor(evidences,resolve,cb) {
+  constructor(evidences,mass,resolve,cb) {
     if(Graviton.trace) {
       console.log('Graviton::constructor:evidences=<',evidences,'>');
     }
     this.evidences_ = evidences;
     this.mqttJwt_ = resolve;
     this.cb_ = cb;
-    this.mass_ = false;
-    const self = this;
-    this.searchMassOfMine_((mass)=>{
-      if(Graviton.trace) {
-        console.log('Graviton::constructor:mass=<',mass,'>');
-      }
-      if(self.mass_ === false) {
-        self.mass_ = mass;
-        self.checkLocalStorageOfMqttJwt_();
-      }
-    });
+    this.mass_ = mass;
+    this.checkLocalStorageOfMqttJwt_();
   }
   publish(topic,msg) {
     if(Graviton.debug) {
@@ -32,44 +23,6 @@ export class Graviton {
       console.log('Graviton::publish:msgSigned=<',msgSigned,'>');
     }
     this.mqttClient_.publish(topic,JSON.stringify(msgSigned));
-  }
-  
-  searchMassOfMine_(cb) {
-    if(Graviton.trace) {
-      console.log('Graviton::searchMassOfMine_:this.evidences_=<',this.evidences_,'>');
-    }
-    for(const evidence of this.evidences_) {
-      if(Graviton.trace) {
-        console.log('Graviton::searchMassOfMine_:evidence=<',evidence,'>');
-      }
-      for(const publicKey of evidence.publicKey) {
-        if(Graviton.trace) {
-          console.log('Graviton::searchMassOfMine_:publicKey=<',publicKey,'>');
-        }
-        const keyId= publicKey.id
-        if(Graviton.trace) {
-          console.log('Graviton::searchMassOfMine_:keyId=<',keyId,'>');
-        }
-        const keyIdParams = publicKey.id.split('#');
-        if(Graviton.trace) {
-          console.log('Graviton::searchMassOfMine_:keyIdParams=<',keyIdParams,'>');
-        }
-        if(keyIdParams.length > 1) {
-          const keyAddress = keyIdParams[1];
-          if(Graviton.trace) {
-            console.log('Graviton::searchMassOfMine_:keyAddress=<',keyAddress,'>');
-          }
-          const mass = new MassStore(keyAddress,()=>{
-            if(Graviton.trace) {
-              console.log('Graviton::searchMassOfMine_:mass=<',mass,'>');
-            }
-            if(typeof cb === 'function') {
-              cb(mass)
-            }
-          });
-        }
-      }
-    }
   }
   
   checkLocalStorageOfMqttJwt_() {

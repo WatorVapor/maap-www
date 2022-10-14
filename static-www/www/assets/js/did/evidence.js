@@ -41,7 +41,9 @@ export class Evidence {
   fission(newEvidence) {
     return this.createFromParent_(newEvidence);
   }
-  
+  mass(){
+    return this.didDoc.massAuth_;
+  }
   
   createFromJson_(docJson,cb) {
     if(Evidence.debug) {
@@ -272,7 +274,8 @@ export class ChainOfEvidence {
     }
     const evidences = [this.topEvidence_.document()];
     const self = this;
-    this.graviton_ = new Graviton(evidences,Evidence.did_resolve,(good)=>{
+    const mass = this.topEvidence_.mass();
+    this.graviton_ = new Graviton(evidences,mass,Evidence.did_resolve,(good)=>{
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::createConnection_:good=<',good,'>');
       }

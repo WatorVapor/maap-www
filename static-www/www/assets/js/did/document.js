@@ -16,11 +16,17 @@ export class DIDSeedDocument {
     this.ready1_ = false;
     this.ready2_ = false;
     const self = this;
-    this.massAuth_ = new MassStore(null,()=>{
+    const massAuth = new MassStore(null,(good)=>{
+      if(good === true) {
+        self.massAuth_ = massAuth;
+      }
       self.ready1_ = true;
       self.tryCallReady_(cb);
     });
-    this.massRecovery_ = new MassStore(null,() => {
+    const massRecovery = new MassStore(null,(good) => {
+      if(good === true) {
+        self.massAuth_ = massRecovery;
+      }
       self.ready2_ = true;
       self.tryCallReady_(cb);
     });
@@ -88,8 +94,12 @@ export class DIDSeedDocument {
   }
   tryCallReady_(cb) {
     if(this.ready1_ && this.ready2_) {
-      this.document();
-      cb();
+      if(self.massAuth_) {
+        this.document();
+        cb(true);
+      } else {
+        cb(false);        
+      }
     }
   }
 }
