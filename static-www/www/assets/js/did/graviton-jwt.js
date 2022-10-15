@@ -1,66 +1,18 @@
 import {MassStore} from './mass-store.js';
-const iConstOneHourInMs  = 1000 * 3600;
 export class GravitonJWT {
   static trace = false;
   static debug = true;
-  constructor(evidences,resolve,cb) {
+  constructor(evidences,mass,resolve,cb) {
     if(GravitonJWT.trace) {
       console.log('GravitonJWT::constructor:evidences=<',evidences,'>');
     }
     this.evidences_ = evidences;
     this.mqttJwt_ = resolve;
-    this.mass_ = false;
-    const self = this;
-    this.searchMassOfMine_((mass)=>{
-      if(GravitonJWT.trace) {
-        console.log('GravitonJWT::constructor:mass=<',mass,'>');
-      }
-      if(self.mass_ === false) {
-        self.mass_ = mass;
-        self.reqMqttAuthOfJwt_();
-      }
-    });
+    this.mass_ = mass;
+    this.cb_ = cb;
+    this.reqMqttAuthOfJwt_();
   }
   
-  searchMassOfMine_(cb) {
-    if(GravitonJWT.trace) {
-      console.log('GravitonJWT::searchMassOfMine_:this.evidences_=<',this.evidences_,'>');
-    }
-    for(const evidence of this.evidences_) {
-      if(GravitonJWT.trace) {
-        console.log('GravitonJWT::searchMassOfMine_:evidence=<',evidence,'>');
-      }
-      for(const publicKey of evidence.publicKey) {
-        if(GravitonJWT.trace) {
-          console.log('GravitonJWT::searchMassOfMine_:publicKey=<',publicKey,'>');
-        }
-        const keyId= publicKey.id
-        if(GravitonJWT.trace) {
-          console.log('GravitonJWT::searchMassOfMine_:keyId=<',keyId,'>');
-        }
-        const keyIdParams = publicKey.id.split('#');
-        if(GravitonJWT.trace) {
-          console.log('GravitonJWT::searchMassOfMine_:keyIdParams=<',keyIdParams,'>');
-        }
-        if(keyIdParams.length > 1) {
-          const keyAddress = keyIdParams[1];
-          if(GravitonJWT.trace) {
-            console.log('GravitonJWT::searchMassOfMine_:keyAddress=<',keyAddress,'>');
-          }
-          const mass = new MassStore(keyAddress,()=>{
-            if(GravitonJWT.trace) {
-              console.log('GravitonJWT::searchMassOfMine_:mass=<',mass,'>');
-            }
-            if(typeof cb === 'function') {
-              cb(mass)
-            }
-          });
-        }
-      }
-    }
-  }
-  
-
   reqMqttAuthOfJwt_() {
     if(GravitonJWT.trace) {  
       console.log('GravitonJWT::reqMqttAuthOfJwt_:this.evidences_=<',this.evidences_,'>');
@@ -137,6 +89,9 @@ export class GravitonJWT {
     if(payload.keyid) {
       const jwtLSKey = `${constDIDTeamAuthGravitonJwtPrefix}/${payload.keyid}`;
       localStorage.setItem(jwtLSKey,origData);
+    }
+    if(typeof this.cb_ === 'function') {
+      this.cb_();
     }
   }
 }

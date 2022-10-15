@@ -25,7 +25,7 @@ export class DIDSeedDocument {
     });
     const massRecovery = new MassStore(null,(good) => {
       if(good === true) {
-        self.massAuth_ = massRecovery;
+        self.massRecovery_ = massRecovery;
       }
       self.ready2_ = true;
       self.tryCallReady_(cb);

@@ -3,15 +3,16 @@ const iConstOneDayMs = 1000*3600*24;
 export class MassStore {
   static trace = false;
   static debug = false;
+  static store_prefix = 'eddsa';
   constructor(keyAddress,readycb) {
     this.readyCB_ = readycb;
     this.massStore_ = localforage.createInstance({
-      name: 'maap_mass_key'
+      name: 'maap_mass_store'
     });    
     if(keyAddress) {
-      this.secretKeyPath_ = `${constDIDTeamAuthMassPrefix}/${keyAddress}/secretKey`;
-      this.publicKeyPath_ = `${constDIDTeamAuthMassPrefix}/${keyAddress}/publicKey`;
-      this.addressPath_ = `${constDIDTeamAuthMassPrefix}/${keyAddress}/address`;
+      this.secretKeyPath_ = `${MassStore.store_prefix}/${keyAddress}/secretKey`;
+      this.publicKeyPath_ = `${MassStore.store_prefix}/${keyAddress}/publicKey`;
+      this.addressPath_ = `${MassStore.store_prefix}/${keyAddress}/address`;
       if(MassStore.trace) {
         console.log('MassStore::constructor::this.secretKeyPath_=<',this.secretKeyPath_,'>');
         console.log('MassStore::constructor::this.publicKeyPath_=<',this.publicKeyPath_,'>');
@@ -152,6 +153,7 @@ export class MassStore {
  
   mineMassStoreKey_() {
     const mineWorker = new Worker('/maap/assets/js/did/mass-worker.js',{ type: 'module' });
+    //const mineWorker = new Worker('./mass-worker.js',{ type: 'module' });
     if(MassStore.trace) {
       console.log('MassStore::mineMassStoreKey_::mineWorker=<',mineWorker,'>');
     }
@@ -201,9 +203,9 @@ export class MassStore {
     if(MassStore.debug) {
       console.log('MassStore::save2Storage_:address=<',address,'>');
     }
-    this.secretKeyPath_ = `${constDIDTeamAuthMassPrefix}/${address}/secretKey`;
-    this.publicKeyPath_ = `${constDIDTeamAuthMassPrefix}/${address}/publicKey`;
-    this.addressPath_ = `${constDIDTeamAuthMassPrefix}/${address}/address`;
+    this.secretKeyPath_ = `${MassStore.store_prefix}/${address}/secretKey`;
+    this.publicKeyPath_ = `${MassStore.store_prefix}/${address}/publicKey`;
+    this.addressPath_ = `${MassStore.store_prefix}/${address}/address`;
     if(MassStore.trace) {
       console.log('MassStore::save2Storage_::this.secretKeyPath_=<',this.secretKeyPath_,'>');
       console.log('MassStore::save2Storage_::this.publicKeyPath_=<',this.publicKeyPath_,'>');
@@ -293,11 +295,3 @@ export class MassStore {
     return address;
   }
 }
-
-
-
-
-
-
-
-

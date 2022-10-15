@@ -66,7 +66,7 @@ export class Graviton {
       console.log('Graviton::reqMqttAuthOfJwt_:this.evidences_=<',this.evidences_,'>');
     }
     const self = this;
-    const jwtReq = new GravitonJWT(this.evidences_,this.mqttJwt_,()=>{
+    const jwtReq = new GravitonJWT(this.evidences_,this.mass_,this.mqttJwt_,()=>{
       self.checkLocalStorageOfMqttJwt_();
     });
   }

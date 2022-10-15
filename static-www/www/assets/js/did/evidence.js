@@ -116,6 +116,7 @@ export class Evidence {
 export class ChainOfEvidence {
   static trace = false;
   static debug = true;
+  static chainPrefix = 'didteam/cov';
   constructor(cb) {
     this.topEvidence_ = false;
     this.cb_ = cb;
@@ -220,16 +221,36 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:topic=<',topic,'>');
     }
-    const msg = {
-      evidence:newTop,
-    };
-    this.graviton_.publish(topic,msg);
-    /*
-    setTimeout(()=>{
-      location.reload();
-    },1)
-    */
-
+    this.pull2Root_(newTop.coc_,(evidences)=>{
+      const msg = {
+        evidences:evidences,
+      };
+      this.graviton_.publish(topic,msg);      
+      /*
+      setTimeout(()=>{
+        location.reload();
+      },1)
+      */
+    });
+  }
+  pull2Root_(topBlock,cb) {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::pull2Root_:topBlock=<',topBlock,'>');
+    }
+    const allBlocks = [topBlock];
+    if(topBlock.parent) {
+      const chainPath = `${ChainOfEvidence.chainPrefix}/${topBlock.parent}`;
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::pull2Root_:chainPath=<',chainPath,'>');
+      }      
+      this.chainStore_.getItem(chainPath,(err,value)=>{
+        if(ChainOfEvidence.debug) {
+          console.log('ChainOfEvidence::pull2Root_:err=<',err,'>');
+          console.log('ChainOfEvidence::pull2Root_:value=<',value,'>');
+        }        
+      });
+    }
+    //return allBlocks;
   }
   denyJoinTeam(reqMsg) {
     if(ChainOfEvidence.debug) {
@@ -325,7 +346,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::saveEvidencesToChain_:chainAddress=<',chainAddress,'>');
     }
-    const chainPath = `${constDIDTeamAuthEvidenceChainPrefix}/${chainAddress}`;
+    const chainPath = `${ChainOfEvidence.chainPrefix}/${chainAddress}`;
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::saveEvidencesToChain_:chainPath=<',chainPath,'>');
     }
