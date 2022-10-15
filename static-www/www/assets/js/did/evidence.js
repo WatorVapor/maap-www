@@ -217,6 +217,7 @@ export class ChainOfEvidence {
     }
     localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(newTop.coc_));
     this.saveEvidencesToChain_(this.topEvidence_);
+    this.topEvidence_ = newTop;
     const topic = `${newTop.address()}/guest/reply/join/team`
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:topic=<',topic,'>');
@@ -232,25 +233,6 @@ export class ChainOfEvidence {
       },1)
       */
     });
-  }
-  pull2Root_(topBlock,cb) {
-    if(ChainOfEvidence.debug) {
-      console.log('ChainOfEvidence::pull2Root_:topBlock=<',topBlock,'>');
-    }
-    const allBlocks = [topBlock];
-    if(topBlock.parent) {
-      const chainPath = `${ChainOfEvidence.chainPrefix}/${topBlock.parent}`;
-      if(ChainOfEvidence.debug) {
-        console.log('ChainOfEvidence::pull2Root_:chainPath=<',chainPath,'>');
-      }      
-      this.chainStore_.getItem(chainPath,(err,value)=>{
-        if(ChainOfEvidence.debug) {
-          console.log('ChainOfEvidence::pull2Root_:err=<',err,'>');
-          console.log('ChainOfEvidence::pull2Root_:value=<',value,'>');
-        }        
-      });
-    }
-    //return allBlocks;
   }
   denyJoinTeam(reqMsg) {
     if(ChainOfEvidence.debug) {
@@ -280,6 +262,11 @@ export class ChainOfEvidence {
         const self = this;
         this.topEvidence_ = new Evidence(topEviJson,()=>{
           self.topEvidence_.coc_.didDoc = self.topEvidence_.document();
+          self.pull2Root_(self.topEvidence_.coc_,(evidences)=>{
+            if(ChainOfEvidence.debug) {
+              console.log('ChainOfEvidence::loadEvidence_:evidences=<',evidences,'>');
+            }            
+          });
           self.createConnection_(self.topEvidence_);
           if(typeof self.cb_ === 'function') {
             self.cb_(true);
@@ -342,7 +329,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::saveEvidencesToChain_:evidence=<',evidence,'>');
     }
-    const chainAddress = evidence.calcStrAddress_(evidence.coc_);
+    const chainAddress = evidence.calcBlockAddress_();
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::saveEvidencesToChain_:chainAddress=<',chainAddress,'>');
     }
@@ -355,6 +342,39 @@ export class ChainOfEvidence {
         console.log('ChainOfEvidence::saveEvidencesToChain_:err=<',err,'>');
       }      
     });
+  }
+  pull2Root_(topBlock,cb) {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::pull2Root_:topBlock=<',topBlock,'>');
+    }
+    this.allBlocks_ = [topBlock];
+    if(topBlock.parent) {
+      const chainPath = `${ChainOfEvidence.chainPrefix}/${topBlock.parent}`;
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::pull2Root_:chainPath=<',chainPath,'>');
+      }
+      const self = this;
+      this.chainStore_.getItem(chainPath,(err,value)=>{
+        if(ChainOfEvidence.debug) {
+          console.log('ChainOfEvidence::pull2Root_:err=<',err,'>');
+          console.log('ChainOfEvidence::pull2Root_:value=<',value,'>');
+        }
+        if(err) {
+          cb(self.allBlocks_);
+        } else {
+          const valueJson = JSON.parse(value);
+          if(ChainOfEvidence.debug) {
+            console.log('ChainOfEvidence::pull2Root_:valueJson=<',valueJson,'>');
+          }
+          self.allBlocks_.push(valueJson);
+          if(valueJson.parent) {
+            self.pull2Root_(valueJson,cb);
+          } else {
+            cb(self.allBlocks_);
+          }
+        }
+      });
+    }
   }
 }
 

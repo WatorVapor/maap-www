@@ -131,7 +131,7 @@ export class DIDLinkedDocument {
       console.log('DIDLinkedDocument::appendDocument:this.didDoc_=<',this.didDoc_,'>');
     }
     const didCode = this.didDoc_.id;
-    const newDidDoc = Object.assign({},this.didDoc_);
+    const newDidDoc = JSON.parse(JSON.stringify(this.didDoc_));
     newDidDoc.updated = (new Date()).toISOString();
     const keyIdFull = `${didCode}#${keyid}`;
 
