@@ -120,6 +120,7 @@ export class ChainOfEvidence {
   constructor(cb) {
     this.topEvidence_ = false;
     this.cb_ = cb;
+    this.allBlocks_ = [];
     this.chainStore_ = localforage.createInstance({
       name: 'maap_evidence_chain'
     });    
@@ -204,7 +205,7 @@ export class ChainOfEvidence {
     };
     this.graviton_.publish(topic,msg);
   }
-  allowJoinTeam(reqMsg) {
+  async allowJoinTeam(reqMsg) {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:reqMsg=<',reqMsg,'>');
     }
@@ -216,7 +217,7 @@ export class ChainOfEvidence {
       console.log('ChainOfEvidence::allowJoinTeam:this.topEvidence_=<',this.topEvidence_,'>');
     }
     localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(newTop.coc_));
-    this.saveEvidencesToChain_(this.topEvidence_);
+    await this.saveEvidencesToChain_(this.topEvidence_);
     this.topEvidence_ = newTop;
     const topic = `${newTop.address()}/guest/reply/join/team`
     if(ChainOfEvidence.debug) {
@@ -318,6 +319,9 @@ export class ChainOfEvidence {
       if(typeof this.onJoinReply === 'function') {
         this.onJoinReply(jMsg);
       }
+      if(typeof this.onJoinReplyInternal_ === 'function') {
+        this.onJoinReplyInternal_(jMsg);
+      }
     } else {
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::onMQTTMsg_:topic=<',topic,'>');
@@ -325,7 +329,7 @@ export class ChainOfEvidence {
       }      
     }
   }
-  saveEvidencesToChain_(evidence){
+  async saveEvidencesToChain_(evidence){
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::saveEvidencesToChain_:evidence=<',evidence,'>');
     }
@@ -337,44 +341,52 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::saveEvidencesToChain_:chainPath=<',chainPath,'>');
     }
-    this.chainStore_.setItem(chainPath,JSON.stringify(evidence.coc_),(err)=>{
-      if(ChainOfEvidence.debug) {
-        console.log('ChainOfEvidence::saveEvidencesToChain_:err=<',err,'>');
-      }      
-    });
+    await this.chainStore_.setItem(chainPath,JSON.stringify(evidence.coc_));
   }
   pull2Root_(topBlock,cb) {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::pull2Root_:topBlock=<',topBlock,'>');
     }
     this.allBlocks_ = [topBlock];
-    if(topBlock.parent) {
-      const chainPath = `${ChainOfEvidence.chainPrefix}/${topBlock.parent}`;
+    this.pull2RootInternl_(topBlock,cb);
+  }
+  pull2RootInternl_(currBlock,cb) {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::pull2RootInternl_:currBlock=<',currBlock,'>');
+    }
+    if(currBlock.parent) {
+      const chainPath = `${ChainOfEvidence.chainPrefix}/${currBlock.parent}`;
       if(ChainOfEvidence.debug) {
-        console.log('ChainOfEvidence::pull2Root_:chainPath=<',chainPath,'>');
+        console.log('ChainOfEvidence::pull2RootInternl_:chainPath=<',chainPath,'>');
       }
       const self = this;
       this.chainStore_.getItem(chainPath,(err,value)=>{
         if(ChainOfEvidence.debug) {
-          console.log('ChainOfEvidence::pull2Root_:err=<',err,'>');
-          console.log('ChainOfEvidence::pull2Root_:value=<',value,'>');
+          console.log('ChainOfEvidence::pull2RootInternl_:err=<',err,'>');
+          console.log('ChainOfEvidence::pull2RootInternl_:value=<',value,'>');
         }
         if(err) {
           cb(self.allBlocks_);
         } else {
           const valueJson = JSON.parse(value);
           if(ChainOfEvidence.debug) {
-            console.log('ChainOfEvidence::pull2Root_:valueJson=<',valueJson,'>');
+            console.log('ChainOfEvidence::pull2RootInternl_:valueJson=<',valueJson,'>');
           }
           self.allBlocks_.push(valueJson);
           if(valueJson.parent) {
-            self.pull2Root_(valueJson,cb);
+            self.pull2RootInternl_(valueJson,cb);
           } else {
             cb(self.allBlocks_);
           }
         }
       });
     }
+  }  
+  
+  onJoinReplyInternal_(jMsg) {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::onJoinReplyInternal_:jMsg=<',jMsg,'>');
+    }    
   }
 }
 
