@@ -242,7 +242,7 @@ export class DIDGuestDocument {
             uri:`${DIDDocument.did_mqtt_uri}`,
             acl:{
               all:[
-                `${this.address()}/guest/#`,
+                `${this.address()}/invited/#`,
               ]
             }
           }

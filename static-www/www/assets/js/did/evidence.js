@@ -195,7 +195,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::reqJoinTeam:this.graviton_=<',this.graviton_,'>');
     }
-    const topic = `${this.topEvidence_.address()}/guest/req/join/team`
+    const topic = `${this.topEvidence_.address()}/invited/req/join/team`
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::reqJoinTeam:topic=<',topic,'>');
     }
@@ -219,7 +219,7 @@ export class ChainOfEvidence {
     localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(newTop.coc_));
     await this.saveEvidencesToChain_(this.topEvidence_);
     this.topEvidence_ = newTop;
-    const topic = `${newTop.address()}/guest/reply/join/team`
+    const topic = `${newTop.address()}/invited/reply/join/team`
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:topic=<',topic,'>');
     }
@@ -239,7 +239,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::denyJoinTeam:reqMsg=<',reqMsg,'>');
     }
-    const topic = `${this.topEvidence_.address()}/guest/reply/join/team`
+    const topic = `${this.topEvidence_.address()}/invited/reply/join/team`
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::denyJoinTeam:topic=<',topic,'>');
     }
@@ -303,7 +303,7 @@ export class ChainOfEvidence {
       console.log('ChainOfEvidence::onMQTTMsg_:topic=<',topic,'>');
       console.log('ChainOfEvidence::onMQTTMsg_:jMsg=<',jMsg,'>');
     }
-    if(topic.endsWith('guest/req/join/team')) {
+    if(topic.endsWith('invited/req/join/team')) {
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::onMQTTMsg_:topic=<',topic,'>');
         console.log('ChainOfEvidence::onMQTTMsg_:this.onJoinReq=<',this.onJoinReq,'>');
@@ -311,7 +311,7 @@ export class ChainOfEvidence {
       if(typeof this.onJoinReq === 'function') {
         this.onJoinReq(jMsg);
       }
-    } else if(topic.endsWith('guest/reply/join/team')){
+    } else if(topic.endsWith('invited/reply/join/team')){
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::onMQTTMsg_:topic=<',topic,'>');
         console.log('ChainOfEvidence::onMQTTMsg_:this.onJoinReply=<',this.onJoinReply,'>');
