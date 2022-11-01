@@ -225,6 +225,7 @@ export class ChainOfEvidence {
     }
     this.pull2Root_(newTop.coc_,(evidences)=>{
       const msg = {
+        top:newTop.coc_,
         evidences:evidences,
       };
       this.graviton_.publish(topic,msg);      
@@ -372,11 +373,15 @@ export class ChainOfEvidence {
           if(ChainOfEvidence.debug) {
             console.log('ChainOfEvidence::pull2RootInternl_:valueJson=<',valueJson,'>');
           }
-          self.allBlocks_.push(valueJson);
-          if(valueJson.parent) {
-            self.pull2RootInternl_(valueJson,cb);
+          if(valueJson) {
+            self.allBlocks_.push(valueJson);
+            if(valueJson.parent) {
+              self.pull2RootInternl_(valueJson,cb);
+            } else {
+              cb(self.allBlocks_);
+            }
           } else {
-            cb(self.allBlocks_);
+            cb(self.allBlocks_);            
           }
         }
       });
@@ -386,7 +391,9 @@ export class ChainOfEvidence {
   onJoinReplyInternal_(jMsg) {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::onJoinReplyInternal_:jMsg=<',jMsg,'>');
-    }    
+      console.log('ChainOfEvidence::onJoinReplyInternal_:jMsg.top=<',jMsg.top,'>');
+    }
+    localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(jMsg.top));
   }
 }
 
