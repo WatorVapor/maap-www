@@ -87,7 +87,7 @@ export class Graviton {
       keepalive: 60*5,
       connectTimeout: 4000,
       clean: true,
-      rejectUnauthorized: false
+      rejectUnauthorized: true
     }
     if(Graviton.debug) {
       console.log('Graviton::createMqttConnection_:options=<',options,'>');
