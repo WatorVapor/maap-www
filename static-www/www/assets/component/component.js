@@ -15,7 +15,7 @@ const loadComponetHtml = async (url) => {
   return templateText;
 }
 
-const createMaapVueApp = async (tag,url,data,methods)=> {
+const createMaapVueApp = async (tag,url,data,methods,props)=> {
   const templateText = await loadComponetHtml(url)
   if(maapComponent.debug) {
     console.log('maapComponent::createMaapVueApp:templateText:=<',templateText,'>');
@@ -24,11 +24,17 @@ const createMaapVueApp = async (tag,url,data,methods)=> {
     data() {
      return data;
     },
+  };
+  const compOption = {
+    data() {
+     return data;
+    },
     methods:methods,
+    props:props,
     template:templateText
   };
   const vueApp = Vue.createApp(appOption);
-  vueApp.component(tag,appOption);
+  vueApp.component(tag,compOption);
   if(maapComponent.debug) {
     console.log('maapComponent::createMaapVueApp:vueApp:=<',vueApp,'>');
   }

@@ -7,8 +7,8 @@ const componentData = {
   }
 };
 const { default:createMaapVueApp } = await import(`${constAppPrefix}/assets/component/component.js`);
-const createVueApp = async ()=> {
-  return await createMaapVueApp(componentTag,componentURL,componentData);
+const createVueApp = async (methods)=> {
+  return await createMaapVueApp(componentTag,componentURL,componentData,methods);
 }
 export default createVueApp;
 
