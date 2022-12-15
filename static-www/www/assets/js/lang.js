@@ -38,11 +38,3 @@ const createMultiLanguage_ = async () => {
     appLangList.push(vm);
   });  
 }
-
-
-window.onClickChangeLang = (lang)=> {
-  console.log('onClickChangeLang::lang=<',lang,'>');
-  localStorage.setItem(constKeyLanguangeCode,lang);
-  location.reload(true);
-};
-
