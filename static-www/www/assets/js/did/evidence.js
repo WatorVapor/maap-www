@@ -155,6 +155,7 @@ export class ChainOfEvidence {
       if(typeof cb === 'function') {
         cb();
       }
+      this.saveEvidencesToChain_(self.topEvidence_);
     });
   }
   joinDid(id,cb) {

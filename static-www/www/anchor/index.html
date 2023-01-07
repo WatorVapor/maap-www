@@ -13,26 +13,14 @@
       </div>
       <hr/>
 
-      <div class="row justify-content-center align-items-center" id="vue-ui-connection-of-anchor">
-        <div class="col-6">
+      <div class="row justify-content-center align-items-center" id="vue-ui-device-of-anchor">
+        <div class="col-5">
           <div class="input-group mb-3">
-            <span class="input-group-text">Star Id:</span>
-            <input type="text" class="form-control" readonly :value="mqtt.address" v-model="mqtt.address">
-            <select class="form-select" v-model="mansionSelected">
-              <option selected>Choose Star Mansion ...</option>
-              <option :value="mansion" v-for="mansion in mansions">{{mansion}}</option>
-            </select>
-            <button class="btn btn-success" type="button" @click="onClickAddMansion($event)">+</button>
+            <span class="input-group-text">Node Address:</span>
+            <input type="text" readonly class="form-control" :value="node">
           </div>
           <div class="input-group mb-3">
-            <span class="input-group-text">Star Mansion Id:</span>
-            <input type="text" class="form-control">
-          </div>
-        </div>
-
-        <div class="col-6">
-          <div class="input-group mb-3">
-            <span class="input-group-text">Wifi ssid:</span>
+            <span class="input-group-text">Wifi SSID Prefix:</span>
             <input type="text" class="form-control" :value="wifi.ssid" v-model="wifi.ssid">
           </div>
           <div class="input-group mb-3">
@@ -40,12 +28,8 @@
             <input type="password" class="form-control" :value="wifi.password" v-model="wifi.password">
           </div>
           <div class="input-group mb-3">
-            <span class="input-group-text">MQTT URL:</span>
-            <input type="text" class="form-control" :value="mqtt.url" v-model="mqtt.url">
-          </div>
-          <div class="input-group mb-3">
-            <span class="input-group-text">MQTT JWT:</span>
-            <input type="text" class="form-control" :value="mqtt.jwt" v-model="mqtt.jwt">
+            <span class="input-group-text">mesh port:</span>
+            <input type="text" class="form-control" :value="wifi.port" v-model="wifi.port">
           </div>
           <div class="input-group mb-3">
             <span class="input-group-text">UWB Mode:</span>
@@ -58,13 +42,10 @@
             <input type="text" class="form-control" :value="uwb.id" v-model="uwb.id">
           </div>
           <div class="input-group mb-3">
-            <button class="btn btn-success" type="button" @click="onClickChangeSetting($event)">Apply Connection Info</button>
+            <button class="btn btn-success" type="button" @click="onClickChangeDeviceInfo($event)">Apply device Info</button>
           </div>
         </div>
-
-      </div>
-      <div class="row justify-content-center align-items-center" id="vue-ui-uwb-of-anchor">
-        <div class="col-6">
+        <div class="col-5">
           <div class="input-group mb-3 mt-2">
             <span class="input-group-text">Anchor Number:</span>
             <input type="text" class="form-control" v-model="uwb.id">
@@ -85,12 +66,9 @@
             <button class="btn btn-success" type="button" @click="onClickChangeAnchorId($event)">Apply Anchor Id</button>
           </div>
         </div>
-        <div class="col-6">
-        </div>
       </div>
       
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/uri-js@4.4.1/dist/es5/uri.all.min.js" integrity="sha256-IslPl+jYchlZ3iz2MeZzZIBBRr9QbSEcT01+XKtwRVI=" crossorigin="anonymous"></script>
     <script src="./ui.ble.js" type="text/javascript"></script>
-    <script src="./connection.vue.ui.js" type="module"></script>
+    <script src="./device.vue.ui.js" type="module"></script>
     <script src="./anchor.vue.ui.js" type="module"></script>

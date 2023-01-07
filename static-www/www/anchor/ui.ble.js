@@ -3,7 +3,8 @@ const constNiuMaRxUUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
 const constNiuMaTxUUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
 const constNiuMaBleFilter = {
   filters:[
-    {namePrefix: 'UWB_GPS_Anchor ESP32'}
+    {namePrefix: 'maap_'},
+    {namePrefix: 'maap_esp32_'},    
   ],
   optionalServices:[
     constNiuMaServiceUUID
@@ -58,13 +59,16 @@ const onBleData = (characteristic,value) => {
 
 const onSettingInfo = (info) => {
   console.log('::onSettingInfo::info=<',info,'>');
-  if(typeof onConnectiongInfo === 'function') {
-    onConnectiongInfo(info);
+  console.log('::onSettingInfo::typeof onDeviceInfo=<',typeof onDeviceInfo,'>');
+  if(typeof onDeviceInfo === 'function') {
+    onDeviceInfo(info);
   }
 }
 
 
 const writeJsonCmd = (jCmd) => {
+  console.log('::writeJsonCmd::jCmd=<',jCmd,'>');
+  jCmd.maap = true;
   console.log('::writeJsonCmd::jCmd=<',jCmd,'>');
   const strCmd = JSON.stringify(jCmd);
   //console.log('::writeJsonCmd::strCmd=<',strCmd,'>');
