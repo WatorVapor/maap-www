@@ -63,6 +63,9 @@ const onSettingInfo = (info) => {
   if(typeof onDeviceInfo === 'function') {
     onDeviceInfo(info);
   }
+  if(typeof onUIAnchor === 'function') {
+    onUIAnchor(info.uwb);
+  }
 }
 
 

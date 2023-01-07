@@ -13,8 +13,8 @@
       </div>
       <hr/>
 
-      <div class="row justify-content-center align-items-center" id="vue-ui-device-of-anchor">
-        <div class="col-5">
+      <div class="row justify-content-center align-items-center">
+        <div class="col-5" id="vue-ui-device-of-anchor">
           <div class="input-group mb-3">
             <span class="input-group-text">Node Address:</span>
             <input type="text" readonly class="form-control" :value="node">
@@ -45,7 +45,7 @@
             <button class="btn btn-success" type="button" @click="onClickChangeDeviceInfo($event)">Apply device Info</button>
           </div>
         </div>
-        <div class="col-5">
+        <div class="col-5" id="vue-ui-uwb-of-anchor">
           <div class="input-group mb-3 mt-2">
             <span class="input-group-text">Anchor Number:</span>
             <input type="text" class="form-control" v-model="uwb.id">
@@ -61,9 +61,6 @@
                 <button class="btn btn-success" type="button" @click="onClickChangeTagId($event)">Change Tag mode</button>
               </div>
             </div>
-          </div>
-          <div class="input-group mb-3">
-            <button class="btn btn-success" type="button" @click="onClickChangeAnchorId($event)">Apply Anchor Id</button>
           </div>
         </div>
       </div>
