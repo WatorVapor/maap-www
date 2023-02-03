@@ -1,7 +1,7 @@
 import {DIDSeedDocument,DIDLinkedDocument,DIDGuestDocument} from './document.js';
 import {Graviton} from './graviton.js';
 
-//import {LocalForage} from 'https://cdn.jsdelivr.net/npm/localforage@1.10.0/build/es5src/localforage.js';
+import {Level} from 'https://cdn.jsdelivr.net/npm/level@8.0.0/+esm'
 
 export class Evidence {
   static trace = false;
@@ -121,9 +121,7 @@ export class ChainOfEvidence {
     this.topEvidence_ = false;
     this.cb_ = cb;
     this.allBlocks_ = [];
-    this.chainStore_ = localforage.createInstance({
-      name: 'maap_evidence_chain'
-    });    
+    this.chainStore_ = new Level('maap_evidence_chain', { valueEncoding: 'json' });
     this.loadEvidence_();
   }
   address() {
@@ -343,7 +341,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::saveEvidencesToChain_:chainPath=<',chainPath,'>');
     }
-    await this.chainStore_.setItem(chainPath,JSON.stringify(evidence.coc_));
+    await this.chainStore_.put(chainPath,JSON.stringify(evidence.coc_));
   }
   pull2Root_(topBlock,cb) {
     if(ChainOfEvidence.debug) {
