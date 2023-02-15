@@ -360,7 +360,7 @@ export class ChainOfEvidence {
         console.log('ChainOfEvidence::pull2RootInternl_:chainPath=<',chainPath,'>');
       }
       const self = this;
-      this.chainStore_.getItem(chainPath,(err,value)=>{
+      this.chainStore_.get(chainPath,(err,value)=>{
         if(ChainOfEvidence.debug) {
           console.log('ChainOfEvidence::pull2RootInternl_:err=<',err,'>');
           console.log('ChainOfEvidence::pull2RootInternl_:value=<',value,'>');

@@ -115,7 +115,9 @@ const createAccountApp_ = ()=> {
     gApp.joinRecv.recvReq = jMsg;
     myModal.show();
   }
-
+  setTimeout(()=>{
+    //updateMultiLanguage();
+  },1000);
 }
 
 
