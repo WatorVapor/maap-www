@@ -6,11 +6,14 @@ export class MassStore {
   static debug = false;
   static debug2 = true;
   static store_prefix = 'eddsa';
+  static storeDb_ = false;
   constructor(keyAddress,readycb) {
     this.readyCB_ = readycb;
-    this.massStore_ = new Level('maap_mass_store', { valueEncoding: 'json' });
-    if(MassStore.debug2) {
-      console.log('MassStore::constructor::this.massStore_=<',this.massStore_,'>');
+    if(!MassStore.storeDb_) {
+      MassStore.storeDb_ = new Level('maap_mass_store', { valueEncoding: 'json' });
+      if(MassStore.debug) {
+        console.log('MassStore::constructor::MassStore.storeDb_=<',MassStore.storeDb_,'>');
+      }
     }
     if(keyAddress) {
       this.secretKeyPath_ = `${MassStore.store_prefix}/${keyAddress}/secretKey`;
@@ -139,9 +142,9 @@ export class MassStore {
     return this.address_;
   }
   destory() {
-    this.massStore_.removeItem(this.secretKeyPath_);
-    this.massStore_.removeItem(this.publicKeyPath_);
-    this.massStore_.removeItem(this.addressPath_);
+    MassStore.storeDb_.removeItem(this.secretKeyPath_);
+    MassStore.storeDb_.removeItem(this.publicKeyPath_);
+    MassStore.storeDb_.removeItem(this.addressPath_);
   }
   randomId() {
     const randomBytes = nacl.randomBytes(1024);
@@ -190,7 +193,7 @@ export class MassStore {
     }
   }  
   async save2Storage_(keyPair){
-    const ready = await this.massStore_.open();
+    const ready = await MassStore.storeDb_.open();
     if(MassStore.debug2) {
       console.log('MassStore::save2Storage_:ready=<',ready,'>');
     }
@@ -214,38 +217,41 @@ export class MassStore {
       console.log('MassStore::save2Storage_::this.publicKeyPath_=<',this.publicKeyPath_,'>');
       console.log('MassStore::save2Storage_::this.addressPath_=<',this.addressPath_,'>');
     }
-    await this.massStore_.put(this.publicKeyPath_,b64Pub);
-    await this.massStore_.put(this.secretKeyPath_,b64Pri);    
-    await this.massStore_.put(this.addressPath_,address);
+    await MassStore.storeDb_.put(this.publicKeyPath_,b64Pub);
+    await MassStore.storeDb_.put(this.secretKeyPath_,b64Pri);    
+    await MassStore.storeDb_.put(this.addressPath_,address);
     return address;
   }
   
   async loadMassStoreKey_() {
     try {
-      await this.massStore_.open();
+      await MassStore.storeDb_.open();
       if(MassStore.debug) {
-        console.log('MassStore::loadMassStoreKey_:this.massStore_=<',this.massStore_,'>');
+        console.log('MassStore::loadMassStoreKey_:MassStore.storeDb_=<',MassStore.storeDb_,'>');
       }
       if(MassStore.debug2) {
-        console.log('MassStore::loadMassStoreKey_:this.massStore_.status=<',this.massStore_.status,'>');
+        console.log('MassStore::loadMassStoreKey_:MassStore.storeDb_.status=<',MassStore.storeDb_.status,'>');
       }
-      const address = await this.massStore_.get(this.addressPath_);
-      if(MassStore.debug) {
-        console.log('MassStore::loadMassStoreKey_:this.massStore_=<',this.massStore_,'>');
+      if(MassStore.debug2) {
         console.log('MassStore::loadMassStoreKey_:this.addressPath_=<',this.addressPath_,'>');
+      }
+      const address = await MassStore.storeDb_.get(this.addressPath_);
+      if(MassStore.debug2) {
         console.log('MassStore::loadMassStoreKey_:address=<',address,'>');
       }
+      this.address_ = address;
       if(!address) {
         if(typeof this.readyCB_ === 'function') {
           this.readyCB_(false);
         }
         return;
       }
-      this.address_ = address;
-      const PriKey = await this.massStore_.get(this.secretKeyPath_);
-      if(MassStore.debug) {
-        console.log('MassStore::loadMassStoreKey_:this.massStore_=<',this.massStore_,'>');
+
+      if(MassStore.debug2) {
         console.log('MassStore::loadMassStoreKey_:this.secretKeyPath_=<',this.secretKeyPath_,'>');
+      }
+      const PriKey = await MassStore.storeDb_.get(this.secretKeyPath_);
+      if(MassStore.debug2) {
         console.log('MassStore::loadMassStoreKey_:PriKey=<',PriKey,'>');
       }
       this.priKeyB64_ = PriKey;
@@ -259,8 +265,13 @@ export class MassStore {
       }    
       this.secretKey_ = keyPair.secretKey;
       this.publicKey_ = keyPair.publicKey;
-      const pubKey = await this.massStore_.get(this.publicKeyPath_);
-      if(MassStore.debug) {
+
+
+      if(MassStore.debug2) {
+        console.log('MassStore::loadMassStoreKey_:this.publicKeyPath_=<',this.publicKeyPath_,'>');
+      }
+      const pubKey = await MassStore.storeDb_.get(this.publicKeyPath_);
+      if(MassStore.debug2) {
         console.log('MassStore::loadMassStoreKey_:pubKey=<',pubKey,'>');
       }
       this.pubKeyB64_ = pubKey;
