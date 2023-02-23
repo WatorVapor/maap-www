@@ -10,7 +10,7 @@ export class MassStore {
   constructor(keyAddress,readycb) {
     this.readyCB_ = readycb;
     if(!MassStore.storeDb_) {
-      MassStore.storeDb_ = new Level('maap_mass_store', { valueEncoding: 'json' });
+      MassStore.storeDb_ = new Level('maap_store_mass', { valueEncoding: 'json' });
       if(MassStore.debug) {
         console.log('MassStore::constructor::MassStore.storeDb_=<',MassStore.storeDb_,'>');
       }

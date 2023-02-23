@@ -121,7 +121,7 @@ export class ChainOfEvidence {
     this.topEvidence_ = false;
     this.cb_ = cb;
     this.allBlocks_ = [];
-    this.chainStore_ = new Level('maap_evidence_chain', { valueEncoding: 'json' });
+    this.chainStore_ = new Level('maap_store_evidence_chain', { valueEncoding: 'json' });
     this.loadEvidence_();
   }
   address() {
@@ -144,12 +144,12 @@ export class ChainOfEvidence {
   }
   createSeed(cb) {
     const self = this;
-    this.topEvidence_ = new Evidence(null,()=> {
+    this.topEvidence_ = new Evidence(null,async ()=> {
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::createSeed:self.topEvidence_=<',self.topEvidence_.coc_,'>');
       }
       self.topEvidence_.coc_.didDoc = self.topEvidence_.document();
-      localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
+      await this.chainStore_(constDIDTeamAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
       if(typeof cb === 'function') {
         cb();
       }
@@ -159,12 +159,12 @@ export class ChainOfEvidence {
   joinDid(id,cb) {
     const guestEviJson = {id:id,_maap_guest:true};
     const self = this;
-    this.topEvidence_ = new Evidence(guestEviJson,()=> {
+    this.topEvidence_ = new Evidence(guestEviJson,async ()=> {
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::joinDid:self.topEvidence_=<',self.topEvidence_.coc_,'>');
       }
       self.topEvidence_.coc_.didDoc = self.topEvidence_.document();
-      localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
+      await this.chainStore_(constDIDTeamAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
       if(typeof cb === 'function') {
         cb();
       }
@@ -215,7 +215,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:this.topEvidence_=<',this.topEvidence_,'>');
     }
-    localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(newTop.coc_));
+    await this.chainStore_.put(constDIDTeamAuthEvidenceTop,JSON.stringify(newTop.coc_));
     await this.saveEvidencesToChain_(this.topEvidence_);
     this.topEvidence_ = newTop;
     const topic = `${newTop.address()}/invited/reply/join/team`
@@ -249,12 +249,12 @@ export class ChainOfEvidence {
     this.graviton_.publish(topic,msg);
   }
   
-  loadEvidence_() {
-    const topEviStr = localStorage.getItem(constDIDTeamAuthEvidenceTop);
-    if(ChainOfEvidence.trace) {
-      console.log('ChainOfEvidence::loadEvidence_:topEviStr=<',topEviStr,'>');
-    }
-    if(topEviStr) {
+  async loadEvidence_() {
+    try {
+      const topEviStr = await this.chainStore_.get(constDIDTeamAuthEvidenceTop);
+      if(ChainOfEvidence.trace) {
+        console.log('ChainOfEvidence::loadEvidence_:topEviStr=<',topEviStr,'>');
+      }
       const topEviJson = JSON.parse(topEviStr);
       if(ChainOfEvidence.trace) {
         console.log('ChainOfEvidence::loadEvidence_:topEviJson=<',topEviJson,'>');
@@ -274,7 +274,8 @@ export class ChainOfEvidence {
           }
         });
       }
-    } else {
+    } catch (err) {
+      console.log('ChainOfEvidence::loadEvidence_:err=<',err,'>');
     }
   }
   createConnection_(topEvid) {
@@ -387,12 +388,12 @@ export class ChainOfEvidence {
     }
   }  
   
-  onJoinReplyInternal_(jMsg) {
+  async onJoinReplyInternal_(jMsg) {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::onJoinReplyInternal_:jMsg=<',jMsg,'>');
       console.log('ChainOfEvidence::onJoinReplyInternal_:jMsg.top=<',jMsg.top,'>');
     }
-    localStorage.setItem(constDIDTeamAuthEvidenceTop,JSON.stringify(jMsg.top));
+    await this.chainStore_.put(constDIDTeamAuthEvidenceTop,JSON.stringify(jMsg.top));
   }
 }
 

@@ -12,8 +12,8 @@ export class Graviton {
     this.cb_ = cb;
     this.mass_ = mass;
     const self = this;
-    this.jwtReq_ = new GravitonJWT(evidences,mass,resolve,(jwt,payload)=>{
-      self.createMqttConnection_(jwt,payload);
+    this.jwtReq_ = new GravitonJWT(evidences,mass,resolve,(jwt)=>{
+      self.createMqttConnection_(jwt.jwt,jwt.payload);
     });
   }
   publish(topic,msg) {

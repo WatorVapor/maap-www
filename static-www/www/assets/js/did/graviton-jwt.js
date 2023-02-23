@@ -1,9 +1,12 @@
+import {Level} from 'https://cdn.jsdelivr.net/npm/level@8.0.0/+esm'
 import {MassStore} from './mass-store.js';
 const iConstOneHourInMs  = 1000 * 3600;
 
 export class GravitonJWT {
   static trace = false;
   static debug = true;
+
+  static storeDb_ = false;
   constructor(evidences,mass,resolve,cb) {
     if(GravitonJWT.trace) {
       console.log('GravitonJWT::constructor:evidences=<',evidences,'>');
@@ -12,10 +15,16 @@ export class GravitonJWT {
     this.mqttJwt_ = resolve;
     this.mass_ = mass;
     this.cb_ = cb;
+    if(!GravitonJWT.storeDb_) {
+      GravitonJWT.storeDb_ = new Level('maap_store_graviton', { valueEncoding: 'json' });
+      if(GravitonJWT.debug) {
+        console.log('GravitonJWT::constructor::GravitonJWT.storeDb_=<',GravitonJWT.storeDb_,'>');
+      }
+    }
     this.checkLocalStorageOfMqttJwt_();
   }
 
-  checkLocalStorageOfMqttJwt_() {
+  async checkLocalStorageOfMqttJwt_() {
     if(GravitonJWT.debug) {
       console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:this.mass_=<',this.mass_,'>');
     }
@@ -23,34 +32,32 @@ export class GravitonJWT {
     if(GravitonJWT.debug) {
       console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:jwtLSKey=<',jwtLSKey,'>');
     }
-    const jwtStr = localStorage.getItem(jwtLSKey);
-    if(jwtStr) {
-      try {
-        const jwt = JSON.parse(jwtStr);
-        if(GravitonJWT.debug) {
-          console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:jwt=<',jwt,'>');
-        }
-        if(jwt.payload && jwt.payload.exp ) {
-          const jwtExpDate = new Date();
-          const timeInMs = parseInt(jwt.payload.exp) *1000;
-          jwtExpDate.setTime(timeInMs);
-          if(GravitonJWT.debug) {
-            console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:jwtExpDate=<',jwtExpDate,'>');
-          }
-          const exp_remain_ms = jwtExpDate - new Date();
-          if(GravitonJWT.debug) {
-            console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:exp_remain_ms=<',exp_remain_ms,'>');
-          }
-          if(exp_remain_ms > iConstOneHourInMs) {
-            if(typeof this.cb_ === 'function') {
-              this.cb_(jwt.jwt,jwt.payload);
-            }
-            return;
-          }
-        }
-      } catch(err) {
-        console.error('GravitonJWT::checkLocalStorageOfMqttJwt_:err=<',err,'>');
+    try {
+      const jwtStr = await GravitonJWT.storeDb_.get(jwtLSKey);
+      const jwt = JSON.parse(jwtStr);
+      if(GravitonJWT.debug) {
+        console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:jwt=<',jwt,'>');
       }
+      if(jwt.payload && jwt.payload.exp ) {
+        const jwtExpDate = new Date();
+        const timeInMs = parseInt(jwt.payload.exp) *1000;
+        jwtExpDate.setTime(timeInMs);
+        if(GravitonJWT.debug) {
+          console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:jwtExpDate=<',jwtExpDate,'>');
+        }
+        const exp_remain_ms = jwtExpDate - new Date();
+        if(GravitonJWT.debug) {
+          console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:exp_remain_ms=<',exp_remain_ms,'>');
+        }
+        if(exp_remain_ms > iConstOneHourInMs) {
+          if(typeof this.cb_ === 'function') {
+            this.cb_(jwt);
+          }
+          return;
+        }
+      }
+    } catch(err) {
+      console.error('GravitonJWT::checkLocalStorageOfMqttJwt_:err=<',err,'>');
     }
     this.reqMqttAuthOfJwt_();
   }
@@ -124,17 +131,17 @@ export class GravitonJWT {
     }
     wsClient.send(JSON.stringify(signedJwtReq));
   }
-  onMqttJwtReply_(jwt,payload,origData) {
+  async onMqttJwtReply_(jwt,payload,origData) {
     if(GravitonJWT.debug) {
       console.log('onMqttJwtReply_::jwt=<',jwt,'>');
       console.log('onMqttJwtReply_::payload=<',payload,'>');
     }
     if(payload.keyid) {
       const jwtLSKey = `${constDIDTeamAuthGravitonJwtPrefix}/${payload.keyid}`;
-      localStorage.setItem(jwtLSKey,origData);
+      await GravitonJWT.storeDb_.put(jwtLSKey,origData);
     }
     if(typeof this.cb_ === 'function') {
-      this.cb_();
+      this.cb_(jwt);
     }
   }
 }
