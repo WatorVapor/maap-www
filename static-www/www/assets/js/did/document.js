@@ -105,9 +105,10 @@ export class DIDSeedDocument {
 }
 
 export class DIDLinkedDocument {
+  static trace = false;
   static debug = true;
   constructor(evidence,cb) {
-    if(DIDLinkedDocument.debug) {
+    if(DIDLinkedDocument.trace) {
       console.log('DIDLinkedDocument::constructor:evidence=<',evidence,'>');
     }
     this.cb_ = cb;
@@ -119,13 +120,13 @@ export class DIDLinkedDocument {
     return this.address_;
   }
   document() {
-    if(DIDLinkedDocument.debug) {
+    if(DIDLinkedDocument.trace) {
       console.log('DIDLinkedDocument::document:this.didDoc_=<',this.didDoc_,'>');
     }
     return this.didDoc_;
   }
   appendDocument(keyid,keyB64) {
-    if(DIDLinkedDocument.debug) {
+    if(DIDLinkedDocument.trace) {
       console.log('DIDLinkedDocument::appendDocument:keyid=<',keyid,'>');
       console.log('DIDLinkedDocument::appendDocument:keyB64=<',keyB64,'>');
       console.log('DIDLinkedDocument::appendDocument:this.didDoc_=<',this.didDoc_,'>');
@@ -170,23 +171,23 @@ export class DIDLinkedDocument {
     return newDidDoc;
   }
   loadAuthMass_() {
-    if(DIDLinkedDocument.debug) {
+    if(DIDLinkedDocument.trace) {
       console.log('DIDLinkedDocument::loadAuthMass_:this.didDoc_=<',this.didDoc_,'>');
     }
     const self = this;
     for(const authentication of this.didDoc_.authentication) {
-      if(DIDLinkedDocument.debug) {
+      if(DIDLinkedDocument.trace) {
         console.log('DIDLinkedDocument::loadAuthMass_:authentication=<',authentication,'>');
       }
       const authParams = authentication.split('#');
       if(authParams.length >1 ) {
         const keyId = authParams[authParams.length-1];
-        if(DIDLinkedDocument.debug) {
+        if(DIDLinkedDocument.trace) {
           console.log('DIDLinkedDocument::loadAuthMass_:keyId=<',keyId,'>');
         }
         if(keyId && !this.massAuth_) {
           const mass = new MassStore(keyId,(good)=>{
-            if(DIDLinkedDocument.debug) {
+            if(DIDLinkedDocument.trace) {
               console.log('DIDLinkedDocument::loadAuthMass_:good=<',good,'>');
             }
             if(good) {

@@ -26,7 +26,7 @@ const createMultiLanguage_ = async () => {
   const langElem = document.querySelectorAll('.vue-lang');
   //console.log('createMultiLanguage_::langElem=<',langElem,'>');
   langElem.forEach((el, i) => {
-    console.log('createMultiLanguage_::el=<',el,'>');
+    //console.log('createMultiLanguage_::el=<',el,'>');
     //console.log('createMultiLanguage_::allData=<',allData,'>');
     const app = Vue.createApp({
       data() {

@@ -24,7 +24,13 @@ export class MassStore {
         console.log('MassStore::constructor::this.publicKeyPath_=<',this.publicKeyPath_,'>');
         console.log('MassStore::constructor::this.addressPath_=<',this.addressPath_,'>');
       }
-      setTimeout(()=>{
+      setTimeout( async ()=>{
+        await MassStore.storeDb_.open();
+        const filter = {};
+        const keys = await MassStore.storeDb_.keys(filter).all()
+        if(MassStore.trace) {
+          console.log('MassStore::constructor::keys=<',keys,'>');
+        }
         this.loadMassStoreKey_();
       },0);
     } else {
@@ -194,7 +200,7 @@ export class MassStore {
   }  
   async save2Storage_(keyPair){
     const ready = await MassStore.storeDb_.open();
-    if(MassStore.debug2) {
+    if(MassStore.trace) {
       console.log('MassStore::save2Storage_:ready=<',ready,'>');
     }
     const b64Pri = nacl.util.encodeBase64(keyPair.secretKey);
@@ -229,14 +235,29 @@ export class MassStore {
       if(MassStore.debug) {
         console.log('MassStore::loadMassStoreKey_:MassStore.storeDb_=<',MassStore.storeDb_,'>');
       }
-      if(MassStore.debug2) {
+      if(MassStore.trace) {
         console.log('MassStore::loadMassStoreKey_:MassStore.storeDb_.status=<',MassStore.storeDb_.status,'>');
       }
-      if(MassStore.debug2) {
+      if(MassStore.trace) {
         console.log('MassStore::loadMassStoreKey_:this.addressPath_=<',this.addressPath_,'>');
       }
+      const filter = {};
+      const addressKeys = await MassStore.storeDb_.keys(filter).all()
+      if(MassStore.trace) {
+        console.log('MassStore::loadMassStoreKey_:addressKeys=<',addressKeys,'>');
+      }
+      if(!addressKeys.includes(this.addressPath_)) {
+        throw new Error('NotFoundError'); 
+      }
+      if(!addressKeys.includes(this.secretKeyPath_)) {
+        throw new Error('NotFoundError'); 
+      }
+      if(!addressKeys.includes(this.publicKeyPath_)) {
+        throw new Error('NotFoundError'); 
+      }
+
       const address = await MassStore.storeDb_.get(this.addressPath_);
-      if(MassStore.debug2) {
+      if(MassStore.trace) {
         console.log('MassStore::loadMassStoreKey_:address=<',address,'>');
       }
       this.address_ = address;
@@ -247,11 +268,11 @@ export class MassStore {
         return;
       }
 
-      if(MassStore.debug2) {
+      if(MassStore.trace) {
         console.log('MassStore::loadMassStoreKey_:this.secretKeyPath_=<',this.secretKeyPath_,'>');
       }
       const PriKey = await MassStore.storeDb_.get(this.secretKeyPath_);
-      if(MassStore.debug2) {
+      if(MassStore.trace) {
         console.log('MassStore::loadMassStoreKey_:PriKey=<',PriKey,'>');
       }
       this.priKeyB64_ = PriKey;
@@ -267,18 +288,20 @@ export class MassStore {
       this.publicKey_ = keyPair.publicKey;
 
 
-      if(MassStore.debug2) {
+      if(MassStore.trace) {
         console.log('MassStore::loadMassStoreKey_:this.publicKeyPath_=<',this.publicKeyPath_,'>');
       }
       const pubKey = await MassStore.storeDb_.get(this.publicKeyPath_);
-      if(MassStore.debug2) {
+      if(MassStore.trace) {
         console.log('MassStore::loadMassStoreKey_:pubKey=<',pubKey,'>');
       }
       this.pubKeyB64_ = pubKey;
       this.publicKeyB64_ = pubKey;
       this.pubKey_ = nacl.util.decodeBase64(pubKey);
     } catch(err) {
-      console.error('MassStore::loadMassStoreKey_:err=<',err,'>');
+      if( err.message !== 'NotFoundError' ) {
+        console.error('MassStore::loadMassStoreKey_:err=<',err,'>');
+      }
       if(typeof this.readyCB_ === 'function') {
         this.readyCB_(false);
       }
