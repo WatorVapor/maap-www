@@ -57,7 +57,7 @@ export class GravitonJWT {
         }
       }
     } catch(err) {
-      console.error('GravitonJWT::checkLocalStorageOfMqttJwt_:err=<',err,'>');
+      console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:err=<',err,'>');
     }
     this.reqMqttAuthOfJwt_();
   }

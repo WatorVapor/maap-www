@@ -149,7 +149,7 @@ export class ChainOfEvidence {
         console.log('ChainOfEvidence::createSeed:self.topEvidence_=<',self.topEvidence_.coc_,'>');
       }
       self.topEvidence_.coc_.didDoc = self.topEvidence_.document();
-      await this.chainStore_(constDIDTeamAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
+      await this.chainStore_.put(constDIDTeamAuthEvidenceTop,JSON.stringify(self.topEvidence_.coc_));
       if(typeof cb === 'function') {
         cb();
       }
