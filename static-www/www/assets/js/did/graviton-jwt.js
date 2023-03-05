@@ -21,6 +21,7 @@ export class GravitonJWT {
     this.mqttJwt_ = resolve;
     this.mass_ = mass;
     this.cb_ = cb;
+    this.addressEvid_ = this.mass_.calcAddress(evidences);
     if(!GravitonJWT.storeDb_) {
       GravitonJWT.storeDb_ = new Level('maap_store_graviton', cfConstLevelOption);
       if(GravitonJWT.debug) {
@@ -127,7 +128,8 @@ export class GravitonJWT {
     const jwtReq = {
       jwt:{
         browser:true,
-        address:this.mass_.address_,
+        addressKey:this.mass_.address_,
+        addressReq:this.addressEvid_,
       },
       evidences:this.evidences_
     }

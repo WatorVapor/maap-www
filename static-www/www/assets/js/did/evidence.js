@@ -58,7 +58,7 @@ export class Evidence {
     this.coc_.parent = docJson.parent;
     this.coc_.stage = docJson.stage;
     this.didDoc = new DIDLinkedDocument(docJson.didDoc,cb);
-    this.addCoc_ = this.calcBlockAddress_();
+    this.addressCoc_ = this.calcBlockAddress_();
   }
   createFromParent_(newEvidence) {
     if(Evidence.debug) {
@@ -76,7 +76,7 @@ export class Evidence {
     this.coc_.parent = null;
     this.coc_.stage = 'stable';
     this.didDoc = new DIDSeedDocument(cb);
-    this.addCoc_ = this.calcBlockAddress_();
+    this.addressCoc_ = this.calcBlockAddress_();
   }
   joinDid(docJson,cb) {
     if(Evidence.debug) {
@@ -85,7 +85,7 @@ export class Evidence {
     this.coc_.parent = null;
     this.coc_.stage = 'guest';
     this.didDoc = new DIDGuestDocument(docJson.id,cb);
-    this.addCoc_ = this.calcBlockAddress_();
+    this.addressCoc_ = this.calcBlockAddress_();
   }
 
   calcBlockAddress_() {
