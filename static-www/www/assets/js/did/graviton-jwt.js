@@ -22,6 +22,7 @@ export class GravitonJWT {
     this.mass_ = mass;
     this.cb_ = cb;
     this.addressEvid_ = this.mass_.calcAddress(evidences);
+    this.jwtLSKey_ = `${constDIDTeamAuthGravitonJwtPrefix}/${this.addressEvid_}/${this.mass_.address_}`;
     if(!GravitonJWT.storeDb_) {
       GravitonJWT.storeDb_ = new Level('maap_store_graviton', cfConstLevelOption);
       if(GravitonJWT.debug) {
@@ -35,12 +36,8 @@ export class GravitonJWT {
     if(GravitonJWT.debug) {
       console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:this.mass_=<',this.mass_,'>');
     }
-    const jwtLSKey = `${constDIDTeamAuthGravitonJwtPrefix}/${this.mass_.address_}`;
-    if(GravitonJWT.debug) {
-      console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:jwtLSKey=<',jwtLSKey,'>');
-    }
     try {
-      const jwtStr = await GravitonJWT.storeDb_.get(jwtLSKey);
+      const jwtStr = await GravitonJWT.storeDb_.get(this.jwtLSKey_);
       const jwt = JSON.parse(jwtStr);
       if(GravitonJWT.debug) {
         console.log('GravitonJWT::checkLocalStorageOfMqttJwt_:jwt=<',jwt,'>');
@@ -145,7 +142,7 @@ export class GravitonJWT {
       console.log('onMqttJwtReply_::payload=<',payload,'>');
     }
     if(payload.keyid) {
-      const jwtLSKey = `${constDIDTeamAuthGravitonJwtPrefix}/${payload.keyid}`;
+      const jwtLSKey = `${constDIDTeamAuthGravitonJwtPrefix}/${payload.reqid}/${payload.keyid}`;
       await GravitonJWT.storeDb_.put(jwtLSKey,origData);
     }
     if(typeof this.cb_ === 'function') {
