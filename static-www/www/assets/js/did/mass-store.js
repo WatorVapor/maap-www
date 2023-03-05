@@ -1,6 +1,12 @@
 const iConstOneDayMs = 1000*3600*24;
 import {Level} from 'https://cdn.jsdelivr.net/npm/level@8.0.0/+esm'
 
+const cfConstLevelOption = {
+  createIfMissing: true,
+  keyEncoding: 'utf8',
+  valueEncoding: 'utf8',
+};
+
 export class MassStore {
   static trace = false;
   static debug = false;
@@ -10,7 +16,7 @@ export class MassStore {
   constructor(keyAddress,readycb) {
     this.readyCB_ = readycb;
     if(!MassStore.storeDb_) {
-      MassStore.storeDb_ = new Level('maap_store_mass', { valueEncoding: 'json' });
+      MassStore.storeDb_ = new Level('maap_store_mass', cfConstLevelOption);
       if(MassStore.debug) {
         console.log('MassStore::constructor::MassStore.storeDb_=<',MassStore.storeDb_,'>');
       }

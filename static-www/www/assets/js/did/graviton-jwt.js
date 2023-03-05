@@ -2,6 +2,12 @@ import {Level} from 'https://cdn.jsdelivr.net/npm/level@8.0.0/+esm'
 import {MassStore} from './mass-store.js';
 const iConstOneHourInMs  = 1000 * 3600;
 
+const cfConstLevelOption = {
+  createIfMissing: true,
+  keyEncoding: 'utf8',
+  valueEncoding: 'utf8',
+};
+
 export class GravitonJWT {
   static trace = false;
   static debug = true;
@@ -16,7 +22,7 @@ export class GravitonJWT {
     this.mass_ = mass;
     this.cb_ = cb;
     if(!GravitonJWT.storeDb_) {
-      GravitonJWT.storeDb_ = new Level('maap_store_graviton', { valueEncoding: 'json' });
+      GravitonJWT.storeDb_ = new Level('maap_store_graviton', cfConstLevelOption);
       if(GravitonJWT.debug) {
         console.log('GravitonJWT::constructor::GravitonJWT.storeDb_=<',GravitonJWT.storeDb_,'>');
       }

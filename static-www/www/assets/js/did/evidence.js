@@ -3,6 +3,12 @@ import {Graviton} from './graviton.js';
 
 import {Level} from 'https://cdn.jsdelivr.net/npm/level@8.0.0/+esm'
 
+const cfConstLevelOption = {
+  createIfMissing: true,
+  keyEncoding: 'utf8',
+  valueEncoding: 'utf8',
+};
+
 export class Evidence {
   static trace = false;
   static debug = true;
@@ -52,6 +58,7 @@ export class Evidence {
     this.coc_.parent = docJson.parent;
     this.coc_.stage = docJson.stage;
     this.didDoc = new DIDLinkedDocument(docJson.didDoc,cb);
+    this.addCoc_ = this.calcBlockAddress_();
   }
   createFromParent_(newEvidence) {
     if(Evidence.debug) {
@@ -69,6 +76,7 @@ export class Evidence {
     this.coc_.parent = null;
     this.coc_.stage = 'stable';
     this.didDoc = new DIDSeedDocument(cb);
+    this.addCoc_ = this.calcBlockAddress_();
   }
   joinDid(docJson,cb) {
     if(Evidence.debug) {
@@ -77,10 +85,11 @@ export class Evidence {
     this.coc_.parent = null;
     this.coc_.stage = 'guest';
     this.didDoc = new DIDGuestDocument(docJson.id,cb);
+    this.addCoc_ = this.calcBlockAddress_();
   }
 
   calcBlockAddress_() {
-    const msgStr = JSON.stringify(this);
+    const msgStr = JSON.stringify(this.coc_);
     if(Evidence.debug) {
       console.log('Evidence::calcAddress_:msgStr=<',msgStr,'>');
     }
@@ -121,7 +130,7 @@ export class ChainOfEvidence {
     this.topEvidence_ = false;
     this.cb_ = cb;
     this.allBlocks_ = [];
-    this.chainStore_ = new Level('maap_store_evidence_chain', { valueEncoding: 'json' });
+    this.chainStore_ = new Level('maap_store_evidence_chain',cfConstLevelOption);
     this.loadEvidence_();
   }
   address() {
