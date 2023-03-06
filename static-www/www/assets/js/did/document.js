@@ -105,7 +105,7 @@ export class DIDSeedDocument {
 }
 
 export class DIDLinkedDocument {
-  static trace = false;
+  static trace = true;
   static debug = true;
   constructor(evidence,cb) {
     if(DIDLinkedDocument.trace) {
@@ -152,6 +152,23 @@ export class DIDLinkedDocument {
     }
     if(newDidDoc.authentication.indexOf(keyIdFull) === -1){
       newDidDoc.authentication.push(keyIdFull);
+    }
+    const newService = {
+      id:`${didCode}#${keyid}`,
+      type: 'mqtturi',
+      serviceEndpoint: `${DIDDocument.did_mqtt_end_point}`,
+      serviceMqtt:{
+        uri:`${DIDDocument.did_mqtt_uri}`,
+        acl:{
+          all:[
+          `${didCode}/#`,
+          ]
+        }
+      }      
+    };
+    newDidDoc.service.push(newService);
+    if(DIDLinkedDocument.trace) {
+      console.log('DIDLinkedDocument::appendDocument:newDidDoc.service=<',newDidDoc.service,'>');
     }
    
     

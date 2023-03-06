@@ -108,7 +108,7 @@ export class GravitonJWT {
           console.log('GravitonJWT::createMqttAuthOfJwtConnection_::onmessage:msg=<',msg,'>');
         }
         if(msg.jwt && msg.payload) {
-          self.onMqttJwtReply_(msg.jwt,msg.payload,evt.data);
+          self.onMqttJwtReply_(msg,msg.payload,evt.data);
         }
       } catch(err) {
         console.error('GravitonJWT::createMqttAuthOfJwtConnection_::onmessage:err=<',err,'>');
