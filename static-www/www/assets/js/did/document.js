@@ -105,7 +105,7 @@ export class DIDSeedDocument {
 }
 
 export class DIDLinkedDocument {
-  static trace = true;
+  static trace = false;
   static debug = true;
   constructor(evidence,cb) {
     if(DIDLinkedDocument.trace) {
@@ -208,9 +208,13 @@ export class DIDLinkedDocument {
               console.log('DIDLinkedDocument::loadAuthMass_:good=<',good,'>');
             }
             if(good) {
-              self.massAuth_ = mass;
-              if(typeof self.cb_ === 'function') {
-                self.cb_();
+              for(const service of self.didDoc_.service) {
+                if(service.id.endsWith(`#${keyId}`)) {
+                  self.massAuth_ = mass;
+                  if(typeof self.cb_ === 'function') {
+                    self.cb_();
+                  }
+                }
               }
             }
           });
