@@ -1,8 +1,17 @@
 import * as Vue from 'https://cdn.jsdelivr.net/npm/vue@3.2.39/dist/vue.esm-browser.prod.js';
 import { DIDTeamAuth } from '/maap/assets/js/did-team-auth.js';
-//console.log('::DIDTeamAuth=<',DIDTeamAuth,'>');
+const Account = {
+  trace:true,
+  debug:true,
+};
+
+if(Account.trace) {
+  console.log('::DIDTeamAuth=<',DIDTeamAuth,'>');
+}
 document.addEventListener('DOMContentLoaded', (evt) => {
-  console.log('DOMContentLoaded::evt=<',evt,'>');
+  if(Account.trace) {
+    console.log('DOMContentLoaded::evt=<',evt,'>');
+  }
   createAccountApp_();
 });
 
@@ -12,7 +21,9 @@ let gDidTeam = false;
 
 const createAccountApp_ = ()=> {
   gDidTeam = new DIDTeamAuth( async (ready)=> {
-    console.log('createAccountApp_::ready=<',ready,'>');
+    if(Account.trace) {
+      console.log('createAccountApp_::ready=<',ready,'>');
+    }
     gApp.token.didteam.didText = gDidTeam.address();
     gApp.token.name = DIDTeamAuth.name();
     
@@ -67,14 +78,23 @@ const createAccountApp_ = ()=> {
     },
     methods:{
       onUIClickReqJoinTeam( elem ){
-        console.log('onUIClickReqJoinTeam::elem=<',elem,'>');
-        console.log('onUIClickReqJoinTeam::this.didteam=<',this.didteam,'>');
+        if(Account.trace) {
+          console.log('onUIClickReqJoinTeam::elem=<',elem,'>');
+          console.log('onUIClickReqJoinTeam::this.didteam=<',this.didteam,'>');
+        }
         this.passcode = getRandomInt(1000,9999);
         gDidTeam.reqJoinTeam(this.passcode);
+      },
+      mounted(){
+        if(Account.trace) {
+          console.log('mounted::this.didteam=<',this.didteam,'>');
+        }
       }
     }
   });
-  console.log('createAccountApp_::appDetails=<',appDetails,'>');
+  if(Account.trace) {
+    console.log('createAccountApp_::appDetails=<',appDetails,'>');
+  }
   gApp.details = appDetails.mount('#vue-ui-did-team-details');   
 
 
@@ -89,24 +109,32 @@ const createAccountApp_ = ()=> {
     },
     methods:{
       onUIClickAllowJoinTeam( elem ){
-        console.log('onUIClickAllowJoinTeam::elem=<',elem,'>');
-        console.log('onUIClickAllowJoinTeam::this.didteam=<',this.didteam,'>');
+        if(Account.trace) {
+          console.log('onUIClickAllowJoinTeam::elem=<',elem,'>');
+          console.log('onUIClickAllowJoinTeam::this.didteam=<',this.didteam,'>');
+        }
         gDidTeam.allowJoinTeam(this.recvReq);
       },
       onUIClickDenyJoinTeam( elem ){
-        console.log('onUIClickDenyJoinTeam::elem=<',elem,'>');
-        console.log('onUIClickDenyJoinTeam::this.didteam=<',this.didteam,'>');
+        if(Account.trace) {
+          console.log('onUIClickDenyJoinTeam::elem=<',elem,'>');
+          console.log('onUIClickDenyJoinTeam::this.didteam=<',this.didteam,'>');
+        }
         gDidTeam.denyJoinTeam(this.recvReq);
       }
     }
   });
-  console.log('createAccountApp_::appJoinRecv=<',appJoinRecv,'>');
-  gApp.joinRecv = appJoinRecv.mount('#vue-ui-did-team-recv-join');   
-
-  console.log('createAccountApp_::gApp=<',gApp,'>');
-
+  if(Account.trace) {
+    console.log('createAccountApp_::appJoinRecv=<',appJoinRecv,'>');
+  }
+  gApp.joinRecv = appJoinRecv.mount('#vue-ui-did-team-recv-join');
+  if(Account.trace) {
+    console.log('createAccountApp_::gApp=<',gApp,'>');
+  }
   gDidTeam.onJoinReq = (jMsg) => {
-    console.log('createAccountApp_::jMsg=<',jMsg,'>');
+    if(Account.trace) {
+      console.log('createAccountApp_::jMsg=<',jMsg,'>');
+    }
     const myModal = new bootstrap.Modal(document.getElementById('vue-ui-did-team-recv-join'), {
       keyboard: false
     })
@@ -122,10 +150,14 @@ const createAccountApp_ = ()=> {
 
 
 window.onUIClickCreateDidTeam = (elem) => {
-  console.log('onUIClickCreateDidTeam::elem=<',elem,'>');
+  if(Account.trace) {
+    console.log('onUIClickCreateDidTeam::elem=<',elem,'>');
+  }
   try {
     const spinElem = elem.parentElement.getElementsByTagName('div')[0];
-    console.log('onUIClickCreateDidTeam::spinElem=<',spinElem,'>');
+    if(Account.trace) {
+      console.log('onUIClickCreateDidTeam::spinElem=<',spinElem,'>');
+    }
     spinElem.setAttribute('class','spinner-border text-success ');
     gDidTeam.createDid( async()=>{
       spinElem.setAttribute('class','spinner-border text-success d-none');
@@ -140,16 +172,26 @@ window.onUIClickCreateDidTeam = (elem) => {
 }
 window.onUIClickJoinDid = async (elem) => {
   const spinElem = elem.parentElement.getElementsByTagName('div')[0];
-  console.log('onUIClickCreateDidTeam::spinElem=<',spinElem,'>');
+  if(Account.trace) {
+    console.log('onUIClickCreateDidTeam::spinElem=<',spinElem,'>');
+  }
   spinElem.setAttribute('class','spinner-border text-success ');
 
-  console.log('onUIClickJoinDid::elem=<',elem,'>');
+  if(Account.trace) {
+    console.log('onUIClickJoinDid::elem=<',elem,'>');
+  }
   const didInput = elem.parentElement.parentElement.getElementsByTagName('input')[0];
-  console.log('onUIClickJoinDid::didInput=<',didInput,'>');
-  if(didInput && gDidTeam) {
+  if(Account.trace) {
     console.log('onUIClickJoinDid::didInput=<',didInput,'>');
+  }
+  if(didInput && gDidTeam) {
+    if(Account.trace) {
+      console.log('onUIClickJoinDid::didInput=<',didInput,'>');
+    }
     const didText = didInput.value.trim();
-    console.log('onUIClickJoinDid::didText=<',didText,'>');
+    if(Account.trace) {
+      console.log('onUIClickJoinDid::didText=<',didText,'>');
+    }
     gDidTeam.joinDid(didText,async ()=>{
       spinElem.setAttribute('class','spinner-border text-success d-none');
       gApp.token.didteam.didText = gDidTeam.address();

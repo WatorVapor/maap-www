@@ -87,6 +87,14 @@ export class Evidence {
     this.didDoc = new DIDGuestDocument(docJson.id,cb);
     this.addressCoc_ = this.calcBlockAddress_();
   }
+  calcAddress(msg) {
+    const address = this.didDoc.massAuth_.calcAddress(msg);
+    if(Evidence.trace) {
+      console.log('Evidence::calcBlockAddress_:address=<',address,'>');
+    }
+    return address
+  }
+
 
   calcBlockAddress_() {
     const msgStr = JSON.stringify(this.coc_);
@@ -130,6 +138,7 @@ export class ChainOfEvidence {
     this.topEvidence_ = false;
     this.cb_ = cb;
     this.allBlocks_ = [];
+    this.mapBlocks_ = {};
     this.chainStore_ = new Level('maap_store_evidence_chain',cfConstLevelOption);
     this.loadEvidence_();
   }
@@ -332,6 +341,14 @@ export class ChainOfEvidence {
       if(typeof this.onJoinReplyInternal_ === 'function') {
         this.onJoinReplyInternal_(jMsg);
       }
+    } else if(topic.endsWith('cov/req/stacked')){
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::onMQTTMsg_:topic=<',topic,'>');
+        console.log('ChainOfEvidence::onMQTTMsg_:jMsg=<',jMsg,'>');
+      }
+      if(typeof this.onCovSyncReq_ === 'function') {
+        this.onCovSyncReq_(jMsg);
+      }
     } else {
       if(ChainOfEvidence.debug) {
         console.log('ChainOfEvidence::onMQTTMsg_:topic=<',topic,'>');
@@ -403,6 +420,43 @@ export class ChainOfEvidence {
       console.log('ChainOfEvidence::onJoinReplyInternal_:jMsg.top=<',jMsg.top,'>');
     }
     await this.chainStore_.put(constDIDTeamAuthEvidenceTop,JSON.stringify(jMsg.top));
+  }
+  async onCovSyncReq_(jMsg) {
+    for(const block of this.allBlocks_) {
+      const address = this.topEvidence_.calcAddress(block);
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::loadEvidence_::block:=<',block,'>');
+        console.log('ChainOfEvidence::loadEvidence_::address:=<',address,'>');
+        this.mapBlocks_[address] = block;
+      }
+    }    
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::onCovSyncReq_:jMsg=<',jMsg,'>');
+      console.log('ChainOfEvidence::onCovSyncReq_:jMsg.request=<',jMsg.request,'>');
+      console.log('ChainOfEvidence::onCovSyncReq_:this.allBlocks_=<',this.allBlocks_,'>');
+      console.log('ChainOfEvidence::onCovSyncReq_:this.mapBlocks_=<',this.mapBlocks_,'>');
+    }
+    const address = jMsg.request.address;
+    if(address) {
+      const blockSync = this.mapBlocks_[address];
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::onCovSyncReq_:blockSync=<',blockSync,'>');
+      }
+      if(blockSync) {
+        this.replyCovSync_(blockSync,address);
+      }
+    }
+  }
+  async replyCovSync_(block,address) {
+    const topic = `${this.topEvidence_.address()}/cov/sync/stacked`
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::replyCovSync_:topic=<',topic,'>');
+    }
+    const msg = {
+      block:block,
+      address:address,
+    };
+    this.graviton_.publish(topic,msg);
   }
 }
 
