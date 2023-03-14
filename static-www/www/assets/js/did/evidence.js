@@ -44,8 +44,18 @@ export class Evidence {
     }
     return {};
   }
-  fission(newEvidence) {
-    return this.createFromParent_(newEvidence);
+  fissionJoin(newEvidence) {
+    return this.createFromParentJoin_(newEvidence);
+  }
+  growTop(newInCome) {
+    if(Evidence.debug) {
+      console.log('Evidence::growTop:newInCome=<',newInCome,'>');
+    }
+    const newEvidence = this.createFromParentSync_(newInCome);
+    if(Evidence.debug) {
+      console.log('Evidence::growTop:newEvidence=<',newEvidence,'>');
+    }
+    return newEvidence;
   }
   mass(){
     return this.didDoc.massAuth_;
@@ -60,18 +70,30 @@ export class Evidence {
     this.didDoc = new DIDLinkedDocument(docJson.didDoc,cb);
     this.addressCoc_ = this.calcBlockAddress_();
   }
-  createFromParent_(newEvidence) {
+  createFromParentJoin_(newEvidence) {
     if(Evidence.debug) {
-      console.log('Evidence::createFromParent_:newEvidence=<',newEvidence,'>');
+      console.log('Evidence::createFromParentJoin_:newEvidence=<',newEvidence,'>');
     }
     const evidence = new Evidence(null,null,this);
     evidence.coc_.parent = this.calcBlockAddress_();    
     evidence.coc_.stage = 'stable';
     evidence.didDoc = this.didDoc;
     const keyId = this.calcAddress_(newEvidence.auth.pub);
-    evidence.coc_.didDoc = this.didDoc.appendDocument(keyId,newEvidence.auth.pub);
+    evidence.coc_.didDoc = this.didDoc.joinDocument(keyId,newEvidence.auth.pub);
     return evidence;
   }
+  createFromParentSync_(incomeEvidence) {
+    if(Evidence.debug) {
+      console.log('Evidence::createFromParentSync_:incomeEvidence=<',incomeEvidence,'>');
+    }
+    const evidence = new Evidence(null,null,this);
+    evidence.coc_.parent = this.calcBlockAddress_();    
+    evidence.coc_.stage = 'stable';
+    evidence.didDoc = this.didDoc;
+    evidence.coc_.didDoc = this.didDoc.growDocument(incomeEvidence.coc);
+    return evidence;
+  }
+  
   createSeed_(cb) {
     this.coc_.parent = null;
     this.coc_.stage = 'stable';
@@ -226,7 +248,7 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:reqMsg=<',reqMsg,'>');
     }
-    const newTop = this.topEvidence_.fission(reqMsg);
+    const newTop = this.topEvidence_.fissionJoin(reqMsg);
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::allowJoinTeam:newTop=<',newTop,'>');
     }
@@ -340,6 +362,14 @@ export class ChainOfEvidence {
       }
       if(typeof this.onJoinReplyInternal_ === 'function') {
         this.onJoinReplyInternal_(jMsg);
+      }
+    } else if(topic.endsWith('cov/sync/top')){
+      if(ChainOfEvidence.debug) {
+        console.log('ChainOfEvidence::onMQTTMsg_:topic=<',topic,'>');
+        console.log('ChainOfEvidence::onMQTTMsg_:jMsg=<',jMsg,'>');
+      }
+      if(typeof this.onCovSyncTop_ === 'function') {
+        this.onCovSyncTop_(jMsg);
       }
     } else if(topic.endsWith('cov/req/stacked')){
       if(ChainOfEvidence.debug) {
@@ -457,6 +487,19 @@ export class ChainOfEvidence {
       address:address,
     };
     this.graviton_.publish(topic,msg);
+  }
+  async onCovSyncTop_(jMsg) {
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::onCovSyncTop_:jMsg=<',jMsg,'>');
+    }
+    const growEvidence = this.topEvidence_.growTop(jMsg);
+    if(ChainOfEvidence.debug) {
+      console.log('ChainOfEvidence::onCovSyncTop_:growEvidence=<',growEvidence,'>');
+    }
+    if(evidence.coc_.didDoc) {
+      await this.chainStore_.put(constDIDTeamAuthEvidenceTop,JSON.stringify(growEvidence.coc_));
+      await this.saveEvidencesToChain_(growEvidence);
+    }
   }
 }
 

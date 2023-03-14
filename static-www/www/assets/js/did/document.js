@@ -89,7 +89,7 @@ export class DIDSeedDocument {
     this.didDoc_ = didDoc;
     return didDoc;
   }
-  appendDocument(keyid) {
+  joinDocument(keyid) {
     return didDoc;
   }
   tryCallReady_(cb) {
@@ -125,11 +125,11 @@ export class DIDLinkedDocument {
     }
     return this.didDoc_;
   }
-  appendDocument(keyid,keyB64) {
+  joinDocument(keyid,keyB64) {
     if(DIDLinkedDocument.trace) {
-      console.log('DIDLinkedDocument::appendDocument:keyid=<',keyid,'>');
-      console.log('DIDLinkedDocument::appendDocument:keyB64=<',keyB64,'>');
-      console.log('DIDLinkedDocument::appendDocument:this.didDoc_=<',this.didDoc_,'>');
+      console.log('DIDLinkedDocument::joinDocument:keyid=<',keyid,'>');
+      console.log('DIDLinkedDocument::joinDocument:keyB64=<',keyB64,'>');
+      console.log('DIDLinkedDocument::joinDocument:this.didDoc_=<',this.didDoc_,'>');
     }
     const didCode = this.didDoc_.id;
     const newDidDoc = JSON.parse(JSON.stringify(this.didDoc_));
@@ -166,12 +166,18 @@ export class DIDLinkedDocument {
         }
       }      
     };
-    newDidDoc.service.push(newService);
-    if(DIDLinkedDocument.trace) {
-      console.log('DIDLinkedDocument::appendDocument:newDidDoc.service=<',newDidDoc.service,'>');
+    let isNewService = true;
+    for( const service of newDidDoc.service) {
+      if(service.id === newService.id) {
+        isNewService = false;
+      }
     }
-   
-    
+    if(isNewService) {
+      newDidDoc.service.push(newService);
+    }
+    if(DIDLinkedDocument.trace) {
+      console.log('DIDLinkedDocument::joinDocument:newDidDoc.service=<',newDidDoc.service,'>');
+    }
     delete newDidDoc.proof;
     const creator = `${didCode}#${this.massAuth_.address_}`;
     const proofs = this.didDoc_.proof.filter(( proof ) => {
@@ -187,6 +193,187 @@ export class DIDLinkedDocument {
     newDidDoc.proof = proofs;
     return newDidDoc;
   }
+
+  growDocument(incomeCoc) {
+    if(DIDLinkedDocument.debug) {
+      console.log('DIDLinkedDocument::growDocument:incomeCoc.didDoc=<',incomeCoc.didDoc,'>');
+      console.log('DIDLinkedDocument::growDocument:this.didDoc_=<',this.didDoc_,'>');
+    }
+    const goodIncome = this.massAuth_.verifyDidDoc(incomeCoc.didDoc);
+    if(DIDLinkedDocument.debug) {
+      console.log('DIDLinkedDocument::growDocument:goodIncome=<',goodIncome,'>');
+    }
+    if(!goodIncome) {
+      console.log('DIDLinkedDocument::growDocument:goodIncome=<',goodIncome,'>');
+      return false;
+    }
+    if(this.didDoc_.id !== incomeCoc.didDoc.id) {
+      return false;
+    }
+    if(this.didDoc_.created !== incomeCoc.didDoc.created) {
+      return false;
+    }
+
+    const didCode = this.didDoc_.id;
+    const newDidDoc = JSON.parse(JSON.stringify(incomeCoc.didDoc));
+    if(DIDLinkedDocument.debug) {
+      console.log('DIDLinkedDocument::growDocument:newDidDoc=<',newDidDoc,'>');
+    }
+    let isModified = false;
+
+
+    // authentication 
+    for( const origAuth of this.didDoc_.authentication) {
+      if(DIDLinkedDocument.trace) {
+        console.log('DIDLinkedDocument::growDocument:origAuth=<',origAuth,'>');
+      }
+      const isIncluded = newDidDoc.authentication.includes(origAuth);
+      if(DIDLinkedDocument.debug) {
+        console.log('DIDLinkedDocument::growDocument:isIncluded=<',isIncluded,'>');
+      }
+      if(isIncluded === false) {
+        newDidDoc.authentication.push(origAuth);
+        isModified = true;
+      }
+    }
+    // recovery 
+    for( const origRecovery of this.didDoc_.recovery) {
+      if(DIDLinkedDocument.trace) {
+        console.log('DIDLinkedDocument::growDocument:origRecovery=<',origRecovery,'>');
+      }
+      const isIncluded = newDidDoc.recovery.includes(origRecovery);
+      if(DIDLinkedDocument.debug) {
+        console.log('DIDLinkedDocument::growDocument:isIncluded=<',isIncluded,'>');
+      }
+      if(isIncluded === false) {
+        newDidDoc.recovery.push(origRecovery);
+        isModified = true;
+      }
+    }
+    // public key 
+    for( const origPublicKey of this.didDoc_.publicKey) {
+      if(DIDLinkedDocument.trace) {
+        console.log('DIDLinkedDocument::growDocument:origPublicKey=<',origPublicKey,'>');
+      }
+      let isIncluded = false;
+      for( const newPublicKey of newDidDoc.publicKey) {
+        if(DIDLinkedDocument.trace) {
+          console.log('DIDLinkedDocument::growDocument:newPublicKey=<',newPublicKey,'>');
+        }
+        if(newPublicKey.id === origPublicKey.id) {
+          isIncluded = true;
+        }
+      }
+      if(DIDLinkedDocument.debug) {
+        console.log('DIDLinkedDocument::growDocument:isIncluded=<',isIncluded,'>');
+      }
+      if(isIncluded === false) {
+        newDidDoc.publicKey.push(origPublicKey);
+        isModified = true;
+      }
+    }
+    // service
+    for( const origService of this.didDoc_.service) {
+      if(DIDLinkedDocument.trace) {
+        console.log('DIDLinkedDocument::growDocument:origService=<',origService,'>');
+      }
+      let isIncluded = false;
+      for( const newService of newDidDoc.service) {
+        if(DIDLinkedDocument.trace) {
+          console.log('DIDLinkedDocument::growDocument:newService=<',newService,'>');
+        }
+        if(newService.id === origService.id) {
+          isIncluded = true;
+        }
+      }
+      if(DIDLinkedDocument.debug) {
+        console.log('DIDLinkedDocument::growDocument:isIncluded=<',isIncluded,'>');
+      }
+      if(isIncluded === false) {
+        newDidDoc.service.push(origService);
+        isModified = true;
+      }
+    }
+
+    if(DIDLinkedDocument.debug) {
+      console.log('DIDLinkedDocument::growDocument:isModified=<',isModified,'>');
+    }
+    
+    let proofAgain = false;
+    
+    if(isModified) {
+      newDidDoc.updated = (new Date()).toISOString();
+      proofAgain = true;
+    } else {
+      // proof
+      for( const origProof of this.didDoc_.proof) {
+        if(DIDLinkedDocument.trace) {
+          console.log('DIDLinkedDocument::growDocument:origProof=<',origProof,'>');
+        }
+        let isIncluded = false;
+        for( const newProof of newDidDoc.proof) {
+          if(DIDLinkedDocument.trace) {
+            console.log('DIDLinkedDocument::growDocument:newProof=<',newProof,'>');
+          }
+          if(newProof.creator === origProof.creator) {
+            isIncluded = true;
+          }
+        }
+        if(DIDLinkedDocument.debug) {
+          console.log('DIDLinkedDocument::growDocument:isIncluded=<',isIncluded,'>');
+        }
+        if(isIncluded === false) {
+          proofAgain = true;
+        }
+      }
+    }
+    if(DIDLinkedDocument.debug) {
+      console.log('DIDLinkedDocument::growDocument:proofAgain=<',proofAgain,'>');
+    }
+    
+    if(proofAgain) {
+      delete newDidDoc.proof;
+      const creator = `${didCode}#${this.massAuth_.address_}`;
+      const proofs = newDidDoc.proof.filter(( proof ) => {
+        return proof.creator !== creator;
+      });
+      if(DIDLinkedDocument.debug) {
+        console.log('DIDLinkedDocument::growDocument:proofs=<',proofs,'>');
+      }
+      const signedMsg = this.massAuth_.signWithoutTS(newDidDoc);
+      const proof = {
+        type:'ed25519',
+        creator:creator,
+        signatureValue:signedMsg.auth.sign,
+      };
+      proofs.push(proof); 
+      newDidDoc.proof = proofs;
+      
+    } else {
+      let isLongerThanMe = false;
+      if(newDidDoc.proof.length > this.didDoc_.proof.length) {
+        isLongerThanMe = true;
+      }
+      if(newDidDoc.service.length > this.didDoc_.service.length) {
+        isLongerThanMe = true;
+      }
+      if(newDidDoc.publicKey.length > this.didDoc_.publicKey.length) {
+        isLongerThanMe = true;
+      }
+      if(newDidDoc.recovery.length > this.didDoc_.recovery.length) {
+        isLongerThanMe = true;
+      }
+      if(isLongerThanMe) {
+        return newDidDoc;
+      } else {
+        return false;
+      }
+    }
+    return false;
+  }
+  
+
+
   loadAuthMass_() {
     if(DIDLinkedDocument.trace) {
       console.log('DIDLinkedDocument::loadAuthMass_:this.didDoc_=<',this.didDoc_,'>');
