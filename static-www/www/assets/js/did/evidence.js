@@ -496,9 +496,11 @@ export class ChainOfEvidence {
     if(ChainOfEvidence.debug) {
       console.log('ChainOfEvidence::onCovSyncTop_:growEvidence=<',growEvidence,'>');
     }
-    if(evidence.coc_.didDoc) {
+    if(growEvidence.coc_.didDoc) {
       await this.chainStore_.put(constDIDTeamAuthEvidenceTop,JSON.stringify(growEvidence.coc_));
       await this.saveEvidencesToChain_(growEvidence);
+    } else {
+      console.log('ChainOfEvidence::onCovSyncTop_:growEvidence=<',growEvidence,'>');
     }
   }
 }
