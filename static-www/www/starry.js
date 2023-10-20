@@ -43,6 +43,7 @@ const onGotoMansionFunc = (elem,mansion) => {
 
 
 
+
 const array2Matrix = (array,rowSize)=> {
   const matrix = [];
   let row = [];
